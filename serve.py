@@ -17,6 +17,19 @@ HOST = "127.0.0.1"
 
 
 class Handler(SimpleHTTPRequestHandler):
+    def do_GET(self):
+        # The page asks whether a club server is behind it. This one is static: answer "local"
+        # so the prototype keeps using browser storage (and the console stays clean).
+        if self.path.split("?")[0] == "/api/session":
+            body = b'{"mode":"local"}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
+        super().do_GET()
+
     def end_headers(self):
         self.send_header("Cache-Control", "no-store")
         super().end_headers()

@@ -22,7 +22,11 @@ jobs:
         run: node test_core.js
       - name: Formatting helper tests
         run: node test_format.js
+      - name: Server API tests
+        run: node test_server.js
       - name: Install Playwright (tests only)
         run: pip install playwright==1.56.0 && python -m playwright install --with-deps chromium
-      - name: Browser tests
+      - name: Browser tests (offline prototype)
         run: python test_ui.py
+      - name: Browser tests (connected mode)
+        run: python test_ui_server.py

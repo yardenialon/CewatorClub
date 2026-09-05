@@ -1,9 +1,9 @@
-# SimpliiGood Creator Club — Product Spec (v0.2)
+# SimpliiGood Creator Club — Product Spec (v0.3)
 
 Bilingual (HE/EN) prototype for running a creator & ambassador programme for a
 frozen-food brand in two markets: Israel (ILS) and the United States (USD).
 
-This document describes what v0.2 does, the rules it enforces, and what is
+This document describes what v0.3 does, the rules it enforces, and what is
 deliberately **not** built yet. The Hebrew user guide lives in `GUIDE_HE.md`.
 
 ## 1. Roles
@@ -14,7 +14,7 @@ deliberately **not** built yet. The Hebrew user guide lives in `GUIDE_HE.md`.
 | Creator | "פורטל יוצרים" view toggle + profile picker | Accept/decline offers, submit content links, resubmit after feedback, report publication |
 | Public applicant | Application form | Submit an application (stored as *pending*) |
 
-Role switching is a demo affordance. There is no authentication.
+In the offline prototype (index.html opened as a file) role switching is a demo affordance with no authentication. In connected mode (v0.3, `server/`) roles come from a signed-in session: see section 6b.
 
 ## 2. Core entities
 
@@ -95,6 +95,17 @@ ILS and USD are never summed together.
 - Export/import as JSON (max 2 MB). CSV export of payable/paid assignments with formula-injection protection.
 - Reset restores seed data.
 
+### 6b. Connected mode (v0.3)
+
+- `server/index.js` serves the same `index.html` and exposes a small JSON API: `GET /api/session`, `POST /api/auth/request`, `GET /auth/callback`, `POST /api/auth/logout`, `GET /api/state`, `POST /api/command`.
+- Every change goes through `ClubCore.dispatch` on the server with the actor taken from the session, never from the request body. The client's own `dispatch` is bypassed in this mode.
+- Sign-in is a single-use magic link (15 minutes, hashed at rest) sent to an address that is either a configured admin or a non-rejected creator's e-mail. Sessions are HMAC-signed, HttpOnly, SameSite=Lax cookies (30 days) and are re-resolved on every request, so a rejected creator loses access immediately.
+- Creators receive a scoped state: their own profile, their assignments, non-archived missions in their market (with `openSlots` precomputed), no rates, no activity log, no other creators.
+- Unauthenticated requests may only run `creator.apply` (the public application form).
+- Storage is `data/state.json` and `data/auth.json` behind `server/store.js`; the store interface (`loadState/saveState/loadAuth/saveAuth`) is the single place to swap in a database.
+- Mail delivery: `dev` writes the link to `data/outbox` and returns it to the UI; `webhook` POSTs `{from,to,subject,text}` to a configured URL. SMTP is deliberately not implemented; any relay with an HTTP endpoint works.
+- Hardening in place: same-origin check on POST, 256 KB body limit (413), per-IP rate limit on link requests, no e-mail enumeration (identical answers), constant-time cookie verification, `nosniff` and `no-referrer` headers, refusal to start on a corrupt state file.
+
 ## 7. Security posture of the prototype
 
 - Self-contained HTML with a strict CSP (`default-src 'none'`, no network, no external fonts/scripts).
@@ -103,8 +114,8 @@ ILS and USD are never summed together.
 
 ## 8. Not in v0.1 (required for a real service)
 
-1. Accounts, authentication, role-based permissions, server-side state.
-2. Email/notification delivery to creators.
+1. ~~Accounts, authentication, role-based permissions, server-side state~~ (v0.3, single-process JSON store; a real database, backups and multi-instance deployment are still open).
+2. Notification e-mails to creators (offers, feedback, approvals). Only the sign-in link is delivered today, and only via a webhook relay you configure.
 3. File/video upload and storage.
 4. Real social-platform verification of audience metrics and published posts.
 5. Payment execution (bank transfer, PayPal, etc.) and accounting exports.
@@ -119,6 +130,6 @@ ILS and USD are never summed together.
 | Phase | Goal |
 |-------|------|
 | 0.2 ✅ | Split `app.js` into view modules; creator rejection; mission editing/archiving; unit tests for UI helpers (`format.js`) |
-| 0.3 | Backend (Supabase/Postgres or similar) with the same command/dispatch model; magic-link auth for creators |
-| 0.4 | Email notifications; file upload for drafts; contract acceptance record |
+| 0.3 ✅ | Dependency-free Node server with the same command/dispatch model, JSON store behind a swappable interface, magic-link sign-in, role-scoped state |
+| 0.4 | Postgres store + hosted deployment; notification e-mails (offer, feedback, approval); file upload for drafts; contract acceptance record |
 | 0.5 | Instagram/TikTok API metric checks; payout provider integration |

@@ -1,5 +1,5 @@
 /* Shared UI state, preferences and locale-aware formatters. Loaded first. */
-const APP_VERSION='0.2';
+const APP_VERSION='0.3';
 const C=ClubCore, F=ClubFormat, KEY='simpliigood.creatorclub.v1', PREF='simpliigood.creatorclub.prefs';
 const $=sel=>document.querySelector(sel);
 const e=F.escapeHtml;
@@ -9,6 +9,7 @@ try{prefs=JSON.parse(localStorage.getItem(PREF)||'{}');}catch(_){}
 let lang=prefs.lang==='en'?'en':'he', view='admin', page='dashboard', market='all', search='', creatorId='c3', modalReturnFocus=null;
 const query=new URLSearchParams(location.search);if(query.get('lang')==='en')lang='en';if(query.get('view')==='creator')view='creator';if(query.get('view')==='apply')view='apply';
 let showArchived=false;
+let remote=null, loginError='', linkSentTo='', devLink='';
 let state;
 try {const raw=localStorage.getItem(KEY);state=raw?JSON.parse(raw):C.createSeed();C.validateState(state);}catch(err){state=C.createSeed();loadError='invalidBackup';}
 function t(k){return TRANSLATIONS[lang][k]||k;}
@@ -19,6 +20,7 @@ const number=v=>F.number(v,lang);
 const date=v=>e(F.date(v,lang));
 const marketName=m=>t(m==='IL'?'israel':'usa');
 const forMarket=m=>market==='all'||m===market;
+const slotsLeft=m=>m.openSlots!==undefined?m.openSlots:m.capacity-C.missionCount(state,m.id);
 const getMission=id=>state.missions.find(m=>m.id===id), getCreator=id=>state.creators.find(c=>c.id===id);
 const statusPill=s=>'<span class="status '+e(s)+'">'+e(t(s))+'</span>';
 const initials=F.initials;

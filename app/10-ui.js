@@ -29,8 +29,9 @@ function checkbox(name,label){return '<label class="check"><input type="checkbox
 function link(url,label){try{url=C.https(url);}catch(_){return ''; }return '<a class="btn secondary sm" href="'+e(url)+'" target="_blank" rel="noopener noreferrer">'+icon('external')+e(t(label))+'</a>';}
 const marketTabs=()=>'<div class="filter-tabs" aria-label="'+e(t('market'))+'">'+['all','IL','US'].map(m=>'<button class="'+(market===m?'active':'')+'" data-action="market" data-market="'+m+'">'+e(m==='all'?t('all'):marketName(m))+'</button>').join('')+'</div>';
 const empty=()=>'<div class="empty">'+icon('leaf')+'<p style="margin-top:12px">'+e(t('noResults'))+'</p></div>';
-function persist(next){try{localStorage.setItem(KEY,safeJSON(next));state=next;return true;}catch(_){state=next;toast(t('storageFailed'),true);return false;}}
+function persist(next){if(remote){state=next;return true;}try{localStorage.setItem(KEY,safeJSON(next));state=next;return true;}catch(_){state=next;toast(t('storageFailed'),true);return false;}}
 function act(command,payload,actor){
+  if(remote){remoteAct(command,payload);return true;}
   try{
     try{const raw=localStorage.getItem(KEY);if(raw){const latest=JSON.parse(raw);C.validateState(latest);if(latest.revision>state.revision)state=latest;}}catch(_){}
     const next=C.dispatch(state,command,payload,actor||{role:view==='creator'?'creator':'admin',creatorId});persist(next);closeModal();render();toast(t(actionSuccess(command)));return true;

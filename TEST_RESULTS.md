@@ -1,7 +1,7 @@
-# TEST_RESULTS — SimpliiGood Creator Club v0.2
+# TEST_RESULTS — SimpliiGood Creator Club v0.3
 
 Last run: 2026-09-05, Linux, Node 22, Python 3.11, Chromium 1194 (Playwright 1.56).
-Both suites run automatically in GitHub Actions on every push (`.github/workflows/ci.yml`).
+All suites run automatically in GitHub Actions on every push (`.github/workflows/ci.yml`).
 
 ## Summary
 
@@ -10,7 +10,9 @@ Both suites run automatically in GitHub Actions on every push (`.github/workflow
 | Bundle freshness | `python build.py --check` | pass |
 | Business rules | `node test_core.js` | 42 / 42 pass |
 | Formatting helpers | `node test_format.js` | 15 / 15 pass |
-| Browser flow | `python test_ui.py` | 15 / 15 pass |
+| Server API | `node test_server.js` | 17 / 17 pass |
+| Browser flow, offline prototype | `python test_ui.py` | 15 / 15 pass |
+| Browser flow, connected mode | `python test_ui_server.py` | 7 / 7 pass |
 
 ## What `test_core.js` covers (no browser)
 
@@ -49,11 +51,30 @@ Both suites run automatically in GitHub Actions on every push (`.github/workflow
 
 HTML escaping, initials, currency/number/date formatting per locale, CSV quoting and formula-injection protection, CSV assembly with BOM and CRLF.
 
+## What `test_server.js` covers (server in-process, temp data dir, dev mail)
+
+- Serves index.html; `/api/session` reports remote mode; state and commands need a session; the public application does not; seed is persisted.
+- Magic link: unknown addresses get the same answer without a link; admin link signs in once and the second use is refused; the outbox holds a copy; forged cookies are ignored; logout clears the cookie; a rejected creator can no longer request a link.
+- Scoping: admin sees everything and can create missions; admin cannot act as a creator; creator sees only own profile/assignments, US missions with `openSlots`, no rates or activity; creator can accept own offer but not review or submit others' work; archived missions vanish from the creator view.
+- Hardening: cross-origin POST is refused (403); malformed JSON (400) and oversized bodies (413); per-IP rate limit (429); unknown API routes (404).
+
+## What `test_ui_server.py` covers (Node server as a subprocess, headless Chromium)
+
+1. Anonymous visitor sees the sign-in screen, no demo role toggle, no creator picker.
+2. An invalid link lands back on the sign-in screen.
+3. Admin signs in through the dev link, creates a mission, it lands in `data/state.json`, and survives a reload with localStorage cleared.
+4. Creator signs in, sees only her own portal and work, accepts her offer, and the server records it.
+5. Sign out returns to the sign-in screen.
+6. Public application form works without a session.
+7. No JavaScript or console errors.
+
 ## Not yet verified
 
 - Real-browser acceptance on the user's own machine (Windows, `file://` opening via `START_WINDOWS.bat`, Safari/Firefox localStorage behaviour).
 - JSON backup **import** through the file picker and CSV **download** contents (the download path is exercised by code review only; browsers block script-driven downloads in the test sandbox).
-- Multi-tab synchronisation via the `storage` event.
+- Multi-tab synchronisation via the `storage` event (offline mode); in connected mode a second tab only refreshes after its own next action.
+- Webhook mail delivery against a real relay (only the dev outbox path is exercised).
+- Behaviour behind a reverse proxy with `CLUB_BASE_URL` and `Secure` cookies.
 - Keyboard-only navigation and screen-reader labelling beyond what is asserted above.
 - Rate-card editing through the settings form (covered at the core level, not through the UI).
 - Visual regression: screenshots were reviewed manually for HE desktop, EN creator portal and HE mobile; no automated pixel comparison.
