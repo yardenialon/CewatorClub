@@ -8,10 +8,10 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 | Suite | Command | Result |
 |-------|---------|--------|
 | Bundle freshness | `python build.py --check` | pass |
-| Business rules | `node test_core.js` | 42 / 42 pass |
+| Business rules | `node test_core.js` | 52 / 52 pass |
 | Formatting helpers | `node test_format.js` | 15 / 15 pass |
 | Server API | `node test_server.js` | 17 / 17 pass |
-| Browser flow, offline prototype | `python test_ui.py` | 15 / 15 pass |
+| Browser flow, offline prototype | `python test_ui.py` | 17 / 17 pass |
 | Browser flow, connected mode | `python test_ui_server.py` | 7 / 7 pass |
 
 ## What `test_core.js` covers (no browser)
@@ -27,6 +27,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 - Creator rejection: reason required, admin only, pending only; a rejected creator cannot be approved or offered.
 - Mission editing: title/objective/budget/capacity/deadline/brief/CTA; budget and capacity floors; format locked once assigned; past deadline rules; admin only; seeded title keys replaced.
 - Mission archive / restore: blocked while work is open; archived missions refuse offers and edits; restore reopens; financial stats unchanged; backup validation rejects an archived mission with open work.
+- Ambassador deals: seed pool 20% and preference; affiliate offer uses no budget, splits 10/10 by default, share bounded by pool, remainder to audience; promo codes generated, unique and validated; product package required; zero-budget missions accept affiliate but not paid offers; settlement computes commission from reported sales and keeps mission budgets untouched; pool/share settings apply to new offers only; application preference stored; backup validation guards the invariants.
 - `validateState` rejects wrong versions, structural damage, inconsistent totals, wrong currency, over-allocation, insecure URLs and duplicate creator/mission pairs; accepts states produced by the app.
 
 ## What `test_ui.py` covers (headless Chromium, real localStorage over 127.0.0.1)
@@ -45,7 +46,9 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 12. Admin rejects a pending applicant through the confirm + reason prompts.
 13. Edit mission: market field is locked; a budget below the allocated amount is refused inline; a valid edit is saved.
 14. Archive: refused on a mission with open work; a fresh mission is archived, disappears from the list, reappears under "show archived" without an offer button, and is restored.
-15. No JavaScript errors or console errors during the whole run.
+15. Affiliate offer: choosing an ambassador creator flips the deal type, hides fees, shows the split (10% / 10%, then 12% / 8% after editing), submits with zero budget impact.
+16. Ambassador settings form updates pool and default share.
+17. No JavaScript errors or console errors during the whole run.
 
 ## What `test_format.js` covers
 

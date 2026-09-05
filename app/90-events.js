@@ -32,10 +32,11 @@ document.addEventListener('click',event=>{
  else if(a==='import')$('#import-file')?.click();
  else if(a==='reset'){if(confirm(t('resetConfirm'))){persist(C.createSeed());market='all';creatorId='c3';render();toast(t('saved'));}}
 });
-document.addEventListener('input',event=>{if(event.target.id==='creator-search'){search=event.target.value;$('#creator-table').innerHTML=creatorsTable();}if(event.target.closest('#offer-form')&&['production','distribution','rights'].includes(event.target.name))updateTotal();});
+document.addEventListener('input',event=>{if(event.target.id==='creator-search'){search=event.target.value;$('#creator-table').innerHTML=creatorsTable();}if(event.target.closest('#offer-form')){if(['production','distribution','rights'].includes(event.target.name))updateTotal();if(event.target.name==='creatorShare')updateDeal();if(event.target.name==='promoCode')event.target.dataset.touched='1';}});
 document.addEventListener('change',async event=>{
  if(event.target.id==='creator-picker'){creatorId=event.target.value;render();}
  if(event.target.closest('#offer-form')&&event.target.name==='creatorId')updateQuote();
+ if(event.target.closest('#offer-form')&&event.target.name==='deal')updateDeal();
  if(event.target.id==='import-file'){
   const file=event.target.files[0];if(!file)return;try{if(file.size>2*1024*1024)throw Error();const next=JSON.parse(await file.text());C.validateState(next);if(confirm(t('importConfirm'))){persist(next);render();toast(t('imported'));}}catch(_){toast(t('invalidBackup'),true);}finally{event.target.value='';}
  }
@@ -49,7 +50,8 @@ document.addEventListener('submit',event=>{
  else if(f.id==='publication-form')act('assignment.publish',{id,url:p.url});
  else if(f.id==='review-form')act('assignment.review',{id,decision:event.submitter?.value,feedback:p.feedback,checks:[0,1,2,3].map(i=>f.elements['check'+i].checked)});
  else if(f.id==='verify-form')act('assignment.verify',{id,confirmed:f.elements.confirmed.checked});
- else if(f.id==='payment-form')act('assignment.record',{id,reference:p.reference,confirmed:f.elements.confirmed.checked});
+ else if(f.id==='payment-form')act('assignment.record',{id,reference:p.reference,salesTotal:p.salesTotal,confirmed:f.elements.confirmed.checked});
+ else if(f.id==='affiliate-form')act('settings.affiliate',{pool:p.pool,creatorShare:p.creatorShare});
  else if(f.id==='rates-form'){const rates={};['IL','US'].forEach(m=>{rates[m]={production:{},distribution:[0,1,2,3,4].map(i=>p[m+'-d-'+i])};['reel','story','blog'].forEach(k=>rates[m].production[k]=p[m+'-p-'+k]);});act('settings.rates',{rates});}
  else if(f.id==='apply-form'){
   const payload={...p,consent:f.elements.consent.checked},showError=msg=>{$('#application-errors').textContent=msg;$('#application-errors').classList.remove('hide');};

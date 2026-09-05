@@ -18,9 +18,9 @@ In the offline prototype (index.html opened as a file) role switching is a demo 
 
 ## 2. Core entities
 
-- **Creator** — market, platform (Instagram / TikTok / YouTube / Blog / Newsletter), audience size, engagement %, brand fit %, niche, portfolio URL, status (`pending` → `active` / `rejected`, rejection carries a reason), `metricsVerified` flag.
+- **Creator** — market, platform (Instagram / TikTok / YouTube / Blog / Newsletter), audience size, engagement %, brand fit %, niche, portfolio URL, deal preference (`fee` / `affiliate` / `either`), status (`pending` → `active` / `rejected`, rejection carries a reason), `metricsVerified` flag.
 - **Mission** — market, format (`reel` / `story` / `blog`), objective (`dtc` / `retail` / `education`), budget, capacity (number of creators), deadline, brief, CTA, optional `archived` flag.
-- **Assignment** — the contract between one creator and one mission. Carries locked fees (`production`, `distribution`, `rights`, `total`, `currency`), the status below, content and publication URLs, review checks and history, and a manual payment record.
+- **Assignment** — the contract between one creator and one mission. Has a `deal` type: `fee` (cash) or `affiliate` (products + commission, see 4b). Carries locked fees (`production`, `distribution`, `rights`, `total`, `currency`), the status below, content and publication URLs, review checks and history, and a manual payment record.
 - **Rates** — per-market rate card (production fee per format, five distribution tiers by audience size). Versioned; changing rates only affects *new* quotes.
 - **Activity log** — append-only audit trail of every command (capped at 5,000 entries).
 
@@ -74,15 +74,27 @@ The **bonus / commission** field is stored as a percentage only. Sales attributi
 
 Mission budget covers creator fees only. Product, frozen shipping, taxes, vendor fees, software and management time are out of scope and must be added before a commercial pilot.
 
+### 4b. Ambassador deals (products & commission)
+
+For micro-influencers who work without a cash fee. Chosen per offer (`deal: 'affiliate'`), defaulting to the creator's stated preference.
+
+- A global **commission pool** (default **20%**, editable in settings via `settings.affiliate`) is split per offer into the **creator commission** and the **audience discount**. The admin sets the creator share; the remainder is the discount. Default 10% / 10%.
+- The creator receives a **product package** (free text, required) and a unique **promo code** generated from their name (`TAL10`, `TAL10A`, ...), editable, 4–20 Latin letters/digits, unique among live assignments.
+- Fees are all zero: the offer **does not reserve mission budget** but does take a capacity slot. A mission with budget 0 is therefore ambassadors-only.
+- The pool and split are frozen on the assignment when the offer is made; later settings changes affect new offers only.
+- Same workflow as paid deals. At **record payment** the admin enters the sales attributed to the code; the system stores `salesTotal` and computes `amount = salesTotal × creatorShare`. Attribution is manual; there is no store integration.
+- Stats: `recorded` = recorded fees + commissions; `committed` uses fees only, so commissions never touch mission budgets; `commissions` and `affiliateOpen` are reported separately.
+
 ## 5. Dashboard metrics (per market)
 
 | Metric | Definition |
 |--------|-----------|
 | Budget | Sum of mission budgets |
 | Allocated | Sum of fees on non-cancelled assignments |
-| Recorded | Fees on `paid` assignments |
+| Recorded | Fees on `paid` assignments plus settled commissions |
+| Commissions | Settled commission amounts on `paid` affiliate assignments |
 | Payable | Fees on `payable` assignments |
-| Committed | Allocated − Recorded |
+| Committed | Allocated − recorded fees |
 | Available | Budget − Allocated |
 
 ILS and USD are never summed together.
@@ -119,7 +131,7 @@ ILS and USD are never summed together.
 3. File/video upload and storage.
 4. Real social-platform verification of audience metrics and published posts.
 5. Payment execution (bank transfer, PayPal, etc.) and accounting exports.
-6. Sales attribution and bonus calculation.
+6. Automatic sales attribution to promo codes (commission is computed from a manually reported sales total).
 7. Contract / rights agreement e-signature.
 8. AI brief generation (the "brief builder" currently inserts the default brief).
 9. Analytics on content performance.

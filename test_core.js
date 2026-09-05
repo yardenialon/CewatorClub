@@ -20,9 +20,9 @@ describe('seed data', () => {
     const s = C.createSeed();
     assert.equal(C.validateState(s), true);
     assert.equal(s.version, C.VERSION);
-    assert.equal(s.creators.length, 6);
+    assert.equal(s.creators.length, 7);
     assert.equal(s.missions.length, 4);
-    assert.equal(s.assignments.length, 4);
+    assert.equal(s.assignments.length, 5);
     assert.ok(s.activity.length >= 1);
   });
 
@@ -143,7 +143,7 @@ describe('missions', () => {
     const s = C.createSeed();
     fails(() => C.dispatch(s, 'mission.create', mission, creatorActor('c3')), 'statusInvalid');
     fails(() => C.dispatch(s, 'mission.create', { ...mission, deadline: '2000-01-01' }, ADMIN), 'dateInvalid');
-    fails(() => C.dispatch(s, 'mission.create', { ...mission, budget: 0 }, ADMIN), 'minPrice');
+    fails(() => C.dispatch(s, 'mission.create', { ...mission, budget: -1 }, ADMIN), 'minPrice');
     fails(() => C.dispatch(s, 'mission.create', { ...mission, capacity: 2.5 }, ADMIN), 'budgetPositive');
     fails(() => C.dispatch(s, 'mission.create', { ...mission, market: 'FR' }, ADMIN), 'required');
     fails(() => C.dispatch(s, 'mission.create', { ...mission, brief: 'short' }, ADMIN), 'required');
@@ -332,9 +332,9 @@ describe('mission editing', () => {
   test('capacity below current assignments is rejected', () => {
     let s = C.dispatch(C.createSeed(), 'creator.approve', { id: 'c5' }, ADMIN);
     s = C.dispatch(s, 'creator.verify', { id: 'c5', confirmed: true }, ADMIN);
-    s = validOffer(s, 'c5', 'm1'); // m1 now has 2 assignments
-    fails(() => edit(s, 'm1', { capacity: 1 }), 'capacityBelowAssigned');
-    assert.doesNotThrow(() => edit(s, 'm1', { capacity: 2 }));
+    s = validOffer(s, 'c5', 'm1'); // m1 now has 3 assignments (a1, the affiliate a5, and this one)
+    fails(() => edit(s, 'm1', { capacity: 2 }), 'capacityBelowAssigned');
+    assert.doesNotThrow(() => edit(s, 'm1', { capacity: 3 }));
   });
 
   test('format is locked once creators are assigned, free otherwise', () => {
@@ -397,6 +397,120 @@ describe('mission archive / restore', () => {
     const s2 = C.createSeed();
     s2.missions[0].archived = 'yes';
     fails(() => C.validateState(s2), 'invalidBackup');
+  });
+});
+
+describe('ambassador (affiliate) deals', () => {
+  const affiliateOffer = (s, creatorId, missionId, extra = {}) =>
+    C.dispatch(s, 'assignment.offer', { creatorId, missionId, deal: 'affiliate', productPackage: 'Starter pack: 3 boxes', ...extra }, ADMIN);
+
+  test('seed carries the 20% pool, a creator preference and an affiliate offer', () => {
+    const s = C.createSeed();
+    assert.deepEqual(C.affiliateConfig(s), { pool: 20, creatorShare: 10 });
+    assert.equal(s.creators.find(c => c.id === 'c7').dealPreference, 'affiliate');
+    const a5 = s.assignments.find(a => a.id === 'a5');
+    assert.equal(a5.deal, 'affiliate');
+    assert.equal(a5.fees.total, 0);
+    assert.equal(a5.affiliate.creatorShare + a5.affiliate.audienceDiscount, 20);
+  });
+
+  test('an affiliate offer uses no budget and splits the pool 10/10 by default', () => {
+    const s = C.createSeed();
+    const before = C.allocation(s, 'm3');
+    const next = affiliateOffer(s, 'c7', 'm3');
+    const a = next.assignments.at(-1);
+    assert.equal(a.deal, 'affiliate');
+    assert.equal(a.fees.total, 0);
+    assert.equal(C.allocation(next, 'm3'), before);
+    assert.deepEqual({ pool: a.affiliate.pool, creator: a.affiliate.creatorShare, audience: a.affiliate.audienceDiscount }, { pool: 20, creator: 10, audience: 10 });
+    assert.match(a.affiliate.promoCode, /^[A-Z0-9]{4,20}$/);
+    assert.equal(C.missionCount(next, 'm3'), C.missionCount(s, 'm3') + 1); // still takes a slot
+  });
+
+  test('the creator share is bounded by the pool and the remainder goes to the audience', () => {
+    const s = C.createSeed();
+    const a = affiliateOffer(s, 'c7', 'm3', { creatorShare: 15 }).assignments.at(-1);
+    assert.equal(a.affiliate.creatorShare, 15);
+    assert.equal(a.affiliate.audienceDiscount, 5);
+    fails(() => affiliateOffer(s, 'c7', 'm3', { creatorShare: 25 }), 'minPrice');
+    fails(() => affiliateOffer(s, 'c7', 'm3', { creatorShare: -1 }), 'minPrice');
+  });
+
+  test('promo codes are generated from the name, must be unique and well formed', () => {
+    const s = C.createSeed();
+    assert.equal(C.promoCodeFor(s, s.creators.find(c => c.id === 'c7'), 10), 'TAL10A'); // TAL10 is taken by a5
+    fails(() => affiliateOffer(s, 'c7', 'm3', { promoCode: 'TAL10' }), 'promoCodeTaken');
+    fails(() => affiliateOffer(s, 'c7', 'm3', { promoCode: 'ab' }), 'promoInvalid');
+    const a = affiliateOffer(s, 'c7', 'm3', { promoCode: 'tal-fresh' .replace('-', '') }).assignments.at(-1);
+    assert.equal(a.affiliate.promoCode, 'TALFRESH');
+  });
+
+  test('product package is required; a zero-budget mission accepts affiliate but not paid offers', () => {
+    let s = C.createSeed();
+    fails(() => affiliateOffer(s, 'c7', 'm3', { productPackage: '' }), 'required');
+    s = C.dispatch(s, 'mission.create', { title: 'Ambassadors only', market: 'IL', type: 'story', objective: 'dtc', budget: 0, capacity: 3, deadline: C.future(10), brief: 'Products and commission only.', cta: 'Use your code' }, ADMIN);
+    const m = s.missions.at(-1);
+    fails(() => validOffer(s, 'c1', m.id), 'insufficientBudget');
+    assert.doesNotThrow(() => affiliateOffer(s, 'c7', m.id));
+  });
+
+  test('settlement computes the commission from reported sales', () => {
+    let s = affiliateOffer(C.createSeed(), 'c7', 'm3', { creatorShare: 12 });
+    const id = s.assignments.at(-1).id, me = creatorActor('c7');
+    s = C.dispatch(s, 'assignment.accept', { id, confirmed: true }, me);
+    s = C.dispatch(s, 'assignment.submit', { id, url: 'https://example.com/d' }, me);
+    s = C.dispatch(s, 'assignment.review', { id, decision: 'approved', checks: [true, true, true, true] }, ADMIN);
+    s = C.dispatch(s, 'assignment.publish', { id, url: 'https://example.com/p' }, me);
+    s = C.dispatch(s, 'assignment.verify', { id, confirmed: true }, ADMIN);
+    fails(() => C.dispatch(s, 'assignment.record', { id, reference: 'COMM-1', confirmed: true }, ADMIN), 'minPrice'); // sales total required
+    s = C.dispatch(s, 'assignment.record', { id, reference: 'COMM-1', salesTotal: 2500, confirmed: true }, ADMIN);
+    const a = s.assignments.find(x => x.id === id);
+    assert.equal(a.payment.salesTotal, 2500);
+    assert.equal(a.payment.amount, 300); // 12% of 2500
+    const st = C.stats(s, 'IL');
+    assert.equal(st.commissions, 300);
+    assert.equal(st.recorded, st.recordedFees + 300);
+    assert.equal(st.committed, st.allocated - st.recordedFees); // commissions never touch mission budgets
+    assert.equal(C.validateState(s), true);
+  });
+
+  test('paid deals still record the fee amount', () => {
+    let s = validOffer(C.createSeed(), 'c4', 'm2');
+    const id = s.assignments.at(-1).id, me = creatorActor('c4');
+    s = C.dispatch(s, 'assignment.accept', { id, confirmed: true }, me);
+    s = C.dispatch(s, 'assignment.submit', { id, url: 'https://example.com/d' }, me);
+    s = C.dispatch(s, 'assignment.review', { id, decision: 'approved', checks: [true, true, true, true] }, ADMIN);
+    s = C.dispatch(s, 'assignment.publish', { id, url: 'https://example.com/p' }, me);
+    s = C.dispatch(s, 'assignment.verify', { id, confirmed: true }, ADMIN);
+    s = C.dispatch(s, 'assignment.record', { id, reference: 'FEE-1', confirmed: true }, ADMIN);
+    const a = s.assignments.find(x => x.id === id);
+    assert.equal(a.payment.amount, a.fees.total);
+  });
+
+  test('admin can change the pool and default share; old offers keep their split', () => {
+    let s = affiliateOffer(C.createSeed(), 'c7', 'm3');
+    fails(() => C.dispatch(s, 'settings.affiliate', { pool: 20, creatorShare: 25 }, ADMIN), 'minPrice');
+    fails(() => C.dispatch(s, 'settings.affiliate', { pool: 30, creatorShare: 15 }, creatorActor('c7')), 'statusInvalid');
+    s = C.dispatch(s, 'settings.affiliate', { pool: 30, creatorShare: 15 }, ADMIN);
+    assert.deepEqual(s.affiliate, { pool: 30, creatorShare: 15 });
+    assert.equal(s.assignments.at(-1).affiliate.pool, 20);
+    const a = affiliateOffer(s, 'c1', 'm3').assignments.at(-1);
+    assert.deepEqual([a.affiliate.pool, a.affiliate.creatorShare, a.affiliate.audienceDiscount], [30, 15, 15]);
+  });
+
+  test('applications record the deal preference', () => {
+    const base = { name: 'Pref Creator / Demo', email: 'pref@example.test', market: 'IL', platform: 'Instagram', audience: 3000, engagement: 5, fit: 80, niche: 'Demo', url: 'https://example.com/demo', consent: true };
+    assert.equal(C.dispatch(C.createSeed(), 'creator.apply', { ...base, dealPreference: 'affiliate' }, { role: 'public' }).creators.at(-1).dealPreference, 'affiliate');
+    assert.equal(C.dispatch(C.createSeed(), 'creator.apply', base, { role: 'public' }).creators.at(-1).dealPreference, 'either');
+    fails(() => C.dispatch(C.createSeed(), 'creator.apply', { ...base, dealPreference: 'gold' }, { role: 'public' }), 'required');
+  });
+
+  test('backup validation guards the affiliate invariants', () => {
+    const broken = mutate => { const s = C.createSeed(); mutate(s.assignments.find(a => a.id === 'a5')); return s; };
+    fails(() => C.validateState(broken(a => { a.fees.total = 10; a.fees.production = 10; })), 'invalidBackup');
+    fails(() => C.validateState(broken(a => { a.affiliate.audienceDiscount = 5; })), 'invalidBackup');
+    fails(() => C.validateState(broken(a => { a.affiliate.promoCode = 'no spaces'; })), 'invalidBackup');
+    fails(() => C.validateState(broken(a => { delete a.affiliate; })), 'invalidBackup');
   });
 });
 

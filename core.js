@@ -17,6 +17,14 @@
   function text(v, max=2000, min=0) { if(typeof v!=='string'||v.trim().length<min) fail('required'); if(v.length>max) fail('charLimit'); return v.trim(); }
   function num(v, min=0, max=10000000) { if(v===''||v===null||v===undefined||typeof v==='boolean') fail('minPrice'); const n=Number(v); if(!Number.isFinite(n)||n<min||n>max) fail('minPrice'); return n; }
   function https(v) { try { const u=new URL(v); if(u.protocol!=='https:'||!u.hostname||u.username||u.password) fail('unsafeUrl'); return u.href; } catch(e){ fail('unsafeUrl'); } }
+  const CODE=/^[A-Z0-9]{4,20}$/;
+  function affiliateConfig(s){ const a=s.affiliate||{}; return {pool:Number.isFinite(a.pool)?a.pool:20, creatorShare:Number.isFinite(a.creatorShare)?a.creatorShare:10}; }
+  function promoCodeFor(s, creator, share){
+    const base=(String(creator?.name||'').split(/[\s/]+/)[0].replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,8)||'CLUB');
+    const taken=new Set(s.assignments.filter(a=>a.status!=='cancelled'&&a.affiliate).map(a=>a.affiliate.promoCode));
+    const stem=base+Math.round(Number(share)||0);let code=stem,n=0;while(taken.has(code))code=stem+String.fromCharCode(65+(n++%26));
+    return code;
+  }
   function briefText(m, lang, translations) { return m.brief || translations[lang][m.briefKey || 'briefDefault']; }
   function titleText(m, lang, translations) { return m.titleKey ? translations[lang][m.titleKey] : m.title; }
   function quote(s, creatorId, missionId) {
@@ -35,21 +43,26 @@
     const as=s.assignments.filter(a=>ids.has(a.missionId)&&a.status!=='cancelled');
     const budget=money(ms.reduce((n,m)=>n+m.budget,0));
     const allocated=money(as.reduce((n,a)=>n+a.fees.total,0));
-    const recorded=money(as.filter(a=>a.status==='paid').reduce((n,a)=>n+a.fees.total,0));
+    const paid=as.filter(a=>a.status==='paid');
+    const recordedFees=money(paid.reduce((n,a)=>n+a.fees.total,0));
+    const commissions=money(paid.filter(a=>a.deal==='affiliate').reduce((n,a)=>n+(a.payment?.amount||0),0));
+    const recorded=money(recordedFees+commissions);
     const payable=money(as.filter(a=>a.status==='payable').reduce((n,a)=>n+a.fees.total,0));
-    return {budget,allocated,recorded,payable,committed:money(allocated-recorded),available:money(budget-allocated),currency:currency(market)};
+    const affiliateOpen=as.filter(a=>a.deal==='affiliate'&&a.status!=='paid').length;
+    return {budget,allocated,recorded,recordedFees,commissions,affiliateOpen,payable,committed:money(allocated-recordedFees),available:money(budget-allocated),currency:currency(market)};
   }
   function createSeed() {
     const now=new Date().toISOString();
-    const s={version:VERSION,revision:0,updatedAt:now,ratesVersion:1,
+    const s={version:VERSION,revision:0,updatedAt:now,ratesVersion:1,affiliate:{pool:20,creatorShare:10},
       rates:{IL:{production:{reel:300,story:100,blog:400},distribution:[60,160,320,600,900]},US:{production:{reel:90,story:35,blog:110},distribution:[20,50,100,200,300]}},
       creators:[
-        {id:'c1',name:'Noa Green / Demo',email:'noa@example.test',market:'IL',platform:'Instagram',audience:18400,engagement:4.8,fit:88,niche:'Smoothies & everyday food',url:'https://example.com/demo/noa',status:'active',metricsVerified:true,createdAt:now},
-        {id:'c2',name:'Daniel Cooks / Demo',email:'daniel@example.test',market:'IL',platform:'Blog',audience:12000,engagement:3.2,fit:91,niche:'Recipes & simple cooking',url:'https://example.com/demo/daniel',status:'active',metricsVerified:true,createdAt:now},
+        {id:'c1',name:'Noa Green / Demo',email:'noa@example.test',market:'IL',platform:'Instagram',audience:18400,engagement:4.8,fit:88,niche:'Smoothies & everyday food',url:'https://example.com/demo/noa',status:'active',metricsVerified:true,dealPreference:'fee',createdAt:now},
+        {id:'c2',name:'Daniel Cooks / Demo',email:'daniel@example.test',market:'IL',platform:'Blog',audience:12000,engagement:3.2,fit:91,niche:'Recipes & simple cooking',url:'https://example.com/demo/daniel',status:'active',metricsVerified:true,dealPreference:'fee',createdAt:now},
         {id:'c3',name:'Maya Moves / Demo',email:'maya@example.test',market:'US',platform:'TikTok',audience:32600,engagement:5.2,fit:78,niche:'Food & active routines',url:'https://example.com/demo/maya',status:'active',metricsVerified:true,createdAt:now},
         {id:'c4',name:'Alex Eats / Demo',email:'alex@example.test',market:'US',platform:'Instagram',audience:24100,engagement:3.9,fit:84,niche:'Freezer finds & recipes',url:'https://example.com/demo/alex',status:'active',metricsVerified:true,createdAt:now},
-        {id:'c5',name:'Lia Fresh / Demo',email:'lia@example.test',market:'IL',platform:'Instagram',audience:8700,engagement:6.1,fit:90,niche:'Family recipes',url:'https://example.com/demo/lia',status:'pending',metricsVerified:false,createdAt:now},
-        {id:'c6',name:'Sam Blends / Demo',email:'sam@example.test',market:'US',platform:'Newsletter',audience:6400,engagement:2.7,fit:72,niche:'Food newsletter',url:'https://example.com/demo/sam',status:'pending',metricsVerified:false,createdAt:now}
+        {id:'c5',name:'Lia Fresh / Demo',email:'lia@example.test',market:'IL',platform:'Instagram',audience:8700,engagement:6.1,fit:90,niche:'Family recipes',url:'https://example.com/demo/lia',status:'pending',metricsVerified:false,dealPreference:'either',createdAt:now},
+        {id:'c6',name:'Sam Blends / Demo',email:'sam@example.test',market:'US',platform:'Newsletter',audience:6400,engagement:2.7,fit:72,niche:'Food newsletter',url:'https://example.com/demo/sam',status:'pending',metricsVerified:false,dealPreference:'affiliate',createdAt:now},
+        {id:'c7',name:'Tal Bites / Demo',email:'tal@example.test',market:'IL',platform:'Instagram',audience:4200,engagement:7.4,fit:85,niche:'Snack ideas & lunchboxes',url:'https://example.com/demo/tal',status:'active',metricsVerified:true,dealPreference:'affiliate',createdAt:now}
       ],
       missions:[
         {id:'m1',titleKey:'seedMission1',market:'IL',type:'reel',objective:'dtc',budget:3500,capacity:6,deadline:future(21),briefKey:'briefDefault',cta:'Visit the approved product page',createdAt:now},
@@ -69,6 +82,7 @@
     }
     seedAssignment('a1','c1','m1','submitted'); seedAssignment('a2','c3','m2','offered');
     seedAssignment('a3','c2','m3','accepted',150); seedAssignment('a4','c4','m4','published');
+    s.assignments.push({id:'a5',creatorId:'c7',missionId:'m1',status:'offered',deal:'affiliate',fees:{production:0,distribution:0,rights:0,total:0,currency:'ILS'},affiliate:{pool:20,creatorShare:10,audienceDiscount:10,productPackage:'Demo starter pack: 3 boxes of spirulina cubes',promoCode:'TAL10'},commission:0,rateVersion:1,rightsKey:'rightsNote',createdAt:now,updatedAt:now,revision:0,feedback:'',notes:'Demo content only.',contentUrl:'',publicationUrl:'',checks:[],history:[]});
     s.activity.push({id:uid('log'),at:now,action:'demoData',actor:'system',subject:'SimpliiGood Creator Club'});
     return s;
   }
@@ -77,6 +91,7 @@
     if(!Number.isInteger(s.revision)||s.revision<0||!Number.isInteger(s.ratesVersion)||s.ratesVersion<1)fail('invalidBackup');
     for(const log of s.activity){if(!log||typeof log.at!=='string'||typeof log.action!=='string'||typeof log.subject!=='string')fail('invalidBackup');}
     if(s.creators.length>5000||s.missions.length>5000||s.assignments.length>20000||s.activity.length>5000) fail('invalidBackup');
+    { const af=affiliateConfig(s); num(af.pool,0,100); num(af.creatorShare,0,af.pool); }
     const ids=new Set(), mids=new Map(), cids=new Map();
     for(const m of ['IL','US']){
       if(!s.rates?.[m]?.production||s.rates[m].distribution?.length!==5) fail('invalidBackup');
@@ -86,13 +101,14 @@
       if(typeof c.id!=='string'||ids.has(c.id)||!['IL','US'].includes(c.market)||!['active','pending','rejected'].includes(c.status)||!['Instagram','TikTok','Blog','Newsletter','YouTube'].includes(c.platform)) fail('invalidBackup');
       text(c.name,120,1);text(c.email,254,3);text(c.niche,300);https(c.url);num(c.audience,0,1000000000);num(c.engagement,0,100);num(c.fit,0,100);if(typeof c.metricsVerified!=='boolean')fail('invalidBackup');
       if(c.rejectReason!==undefined)text(c.rejectReason,500);
+      if(c.dealPreference!==undefined&&!['fee','affiliate','either'].includes(c.dealPreference))fail('invalidBackup');
       ids.add(c.id);cids.set(c.id,c);
     }
     for(const m of s.missions){
       if(typeof m.id!=='string'||ids.has(m.id)||!['IL','US'].includes(m.market)||!['reel','story','blog'].includes(m.type)||!['dtc','retail','education'].includes(m.objective))fail('invalidBackup');
       if(m.titleKey&&!['seedMission1','seedMission2','seedMission3','seedMission4'].includes(m.titleKey))fail('invalidBackup');
       if(!m.titleKey)text(m.title,150,3); if(m.briefKey&&m.briefKey!=='briefDefault')fail('invalidBackup'); if(!m.briefKey)text(m.brief,5000,10);
-      text(m.cta,300);num(m.budget,0.01);num(m.capacity,1,500);if(!Number.isInteger(m.capacity)||!/^\d{4}-\d{2}-\d{2}$/.test(m.deadline))fail('invalidBackup');
+      text(m.cta,300);num(m.budget,0);num(m.capacity,1,500);if(!Number.isInteger(m.capacity)||!/^\d{4}-\d{2}-\d{2}$/.test(m.deadline))fail('invalidBackup');
       if(m.archived!==undefined&&m.archived!==true)fail('invalidBackup');
       ids.add(m.id);mids.set(m.id,m);
     }
@@ -105,12 +121,20 @@
       if(!Array.isArray(a.history)||!Array.isArray(a.checks)||typeof a.notes!=='string'||typeof a.feedback!=='string'||!Number.isInteger(a.revision)||a.revision<0)fail('invalidBackup');
       text(a.notes,2000);text(a.feedback,2000);
       num(a.commission,0,100);if(a.contentUrl)https(a.contentUrl);if(a.publicationUrl)https(a.publicationUrl);
+      if(a.deal!==undefined&&!['fee','affiliate'].includes(a.deal))fail('invalidBackup');
+      if(a.deal==='affiliate'){
+        const x=a.affiliate;if(!x||a.fees.total!==0)fail('invalidBackup');
+        num(x.pool,0,100);num(x.creatorShare,0,x.pool);num(x.audienceDiscount,0,100);if(money(x.creatorShare+x.audienceDiscount)!==money(x.pool))fail('invalidBackup');
+        text(x.productPackage,300,3);if(!CODE.test(String(x.promoCode)))fail('invalidBackup');
+        if(a.status==='paid')num(a.payment?.salesTotal,0);
+      } else if(a.affiliate!==undefined)fail('invalidBackup');
       if(['submitted','approved','published','payable','paid'].includes(a.status)&&!a.contentUrl)fail('invalidBackup');
       if(['approved','published','payable','paid'].includes(a.status)&&(!a.approvedAt||a.checks?.length!==4||!a.checks.every(v=>v===true)))fail('invalidBackup');
       if(['published','payable','paid'].includes(a.status)&&!a.publicationUrl)fail('invalidBackup');
       if(['payable','paid'].includes(a.status)&&!a.verifiedAt)fail('invalidBackup');
       if(a.status==='paid'&&(!a.payment?.reference||!a.payment.at))fail('invalidBackup');
-      if(a.status!=='cancelled'){const key=a.missionId+'|'+a.creatorId;if(pairs.has(key))fail('invalidBackup');pairs.add(key);}
+      if(a.status!=='cancelled'){const key=a.missionId+'|'+a.creatorId;if(pairs.has(key))fail('invalidBackup');pairs.add(key);
+        if(a.affiliate){const pk='promo|'+a.affiliate.promoCode;if(pairs.has(pk))fail('invalidBackup');pairs.add(pk);}}
       ids.add(a.id);
     }
     for(const m of s.missions){
@@ -129,7 +153,8 @@
       if(!p.consent)fail('consentRequired');
       if(!['IL','US'].includes(p.market)||!['Instagram','TikTok','Blog','Newsletter','YouTube'].includes(p.platform))fail('required');
       const email=text(p.email,254,3);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail('required');
-      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url:https(p.url),status:'pending',metricsVerified:false,createdAt:now};
+      const dealPreference=p.dealPreference||'either';if(!['fee','affiliate','either'].includes(dealPreference))fail('required');
+      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url:https(p.url),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
       if(!Number.isInteger(c.audience))fail('required');s.creators.push(c);subject=c.name;
     } else if(command==='creator.approve'||command==='creator.verify'||command==='creator.reject'){
       admin();const c=s.creators.find(x=>x.id===p.id);if(!c)fail('required');
@@ -140,7 +165,7 @@
     } else if(command==='mission.create'){
       admin(); if(!['IL','US'].includes(p.market)||!['reel','story','blog'].includes(p.type)||!['dtc','retail','education'].includes(p.objective))fail('required');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||p.deadline<today())fail('dateInvalid');
-      const m={id:uid('m'),title:text(p.title,150,3),market:p.market,type:p.type,objective:p.objective,budget:money(num(p.budget,0.01)),capacity:num(p.capacity,1,500),deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),createdAt:now};
+      const m={id:uid('m'),title:text(p.title,150,3),market:p.market,type:p.type,objective:p.objective,budget:money(num(p.budget,0)),capacity:num(p.capacity,1,500),deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),createdAt:now};
       if(!Number.isInteger(m.capacity))fail('budgetPositive');s.missions.push(m);subject=m.title;
     } else if(command==='mission.update'){
       admin();const m=s.missions.find(x=>x.id===p.id);if(!m)fail('required');if(m.archived)fail('missionArchived');
@@ -148,7 +173,7 @@
       const live=missionCount(s,m.id);
       if(p.type!==m.type&&live>0)fail('typeLocked');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||(p.deadline!==m.deadline&&p.deadline<today()))fail('dateInvalid');
-      const budget=money(num(p.budget,0.01)),capacity=num(p.capacity,1,500);if(!Number.isInteger(capacity))fail('budgetPositive');
+      const budget=money(num(p.budget,0)),capacity=num(p.capacity,1,500);if(!Number.isInteger(capacity))fail('budgetPositive');
       if(budget<allocation(s,m.id)-0.001)fail('budgetBelowAllocated');if(capacity<live)fail('capacityBelowAssigned');
       Object.assign(m,{title:text(p.title,150,3),type:p.type,objective:p.objective,budget,capacity,deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),updatedAt:now});
       delete m.titleKey;delete m.briefKey;subject=m.title;
@@ -166,9 +191,18 @@
       if(m.archived)fail('missionArchived');if(m.deadline<today())fail('deadlinePassed');
       if(s.assignments.some(a=>a.creatorId===c.id&&a.missionId===m.id&&a.status!=='cancelled'))fail('duplicateAssignment');
       if(missionCount(s,m.id)>=m.capacity)fail('noSlots');
-      const f={production:money(num(p.production)),distribution:money(num(p.distribution)),rights:money(num(p.rights)),currency:currency(m.market)};f.total=money(f.production+f.distribution+f.rights);
-      if(f.total<=0)fail('minPrice');if(f.total>m.budget-allocation(s,m.id)+0.001)fail('insufficientBudget');
-      const a={id:uid('a'),creatorId:c.id,missionId:m.id,status:'offered',fees:f,commission:num(p.commission||0,0,100),rateVersion:s.ratesVersion,rightsKey:'rightsNote',createdAt:now,updatedAt:now,revision:0,feedback:'',notes:'',contentUrl:'',publicationUrl:'',checks:[],history:[]};s.assignments.push(a);subject=c.name;
+      const deal=p.deal==='affiliate'?'affiliate':'fee';let f,affiliate;
+      if(deal==='affiliate'){
+        const cfg=affiliateConfig(s),creatorShare=money(num(p.creatorShare===undefined||p.creatorShare===''?cfg.creatorShare:p.creatorShare,0,cfg.pool));
+        const promoCode=String(p.promoCode||promoCodeFor(s,c,creatorShare)).trim().toUpperCase();if(!CODE.test(promoCode))fail('promoInvalid');
+        if(s.assignments.some(a=>a.status!=='cancelled'&&a.affiliate?.promoCode===promoCode))fail('promoCodeTaken');
+        affiliate={pool:cfg.pool,creatorShare,audienceDiscount:money(cfg.pool-creatorShare),productPackage:text(p.productPackage,300,3),promoCode};
+        f={production:0,distribution:0,rights:0,total:0,currency:currency(m.market)};
+      } else {
+        f={production:money(num(p.production)),distribution:money(num(p.distribution)),rights:money(num(p.rights)),currency:currency(m.market)};f.total=money(f.production+f.distribution+f.rights);
+        if(f.total<=0)fail('minPrice');if(f.total>m.budget-allocation(s,m.id)+0.001)fail('insufficientBudget');
+      }
+      const a={id:uid('a'),creatorId:c.id,missionId:m.id,status:'offered',deal,...(affiliate?{affiliate}:{}),fees:f,commission:num(p.commission||0,0,100),rateVersion:s.ratesVersion,rightsKey:'rightsNote',createdAt:now,updatedAt:now,revision:0,feedback:'',notes:'',contentUrl:'',publicationUrl:'',checks:[],history:[]};s.assignments.push(a);subject=c.name;
     } else if(command.startsWith('assignment.')){
       const a=work();subject=s.creators.find(c=>c.id===a.creatorId).name;
       if(command==='assignment.accept'){creator(a);stage(a,['offered']);if(s.missions.find(m=>m.id===a.missionId).deadline<today())fail('deadlinePassed');if(!p.confirmed)fail('consentRequired');a.status='accepted';a.acceptedAt=now;}
@@ -183,14 +217,19 @@
       }
       else if(command==='assignment.publish'){creator(a);stage(a,['approved']);a.publicationUrl=https(p.url);a.publishedAt=now;a.status='published';}
       else if(command==='assignment.verify'){admin();stage(a,['published']);if(!p.confirmed)fail('consentRequired');a.verifiedAt=now;a.status='payable';}
-      else if(command==='assignment.record'){admin();stage(a,['payable']);if(!p.confirmed)fail('consentRequired');a.payment={reference:text(p.reference,100,3),at:now,mode:'demo-manual-record'};a.status='paid';}
+      else if(command==='assignment.record'){admin();stage(a,['payable']);if(!p.confirmed)fail('consentRequired');
+        a.payment={reference:text(p.reference,100,3),at:now,mode:'demo-manual-record',currency:a.fees.currency,amount:a.fees.total};
+        if(a.deal==='affiliate'){const sales=money(num(p.salesTotal,0));a.payment.salesTotal=sales;a.payment.amount=money(sales*a.affiliate.creatorShare/100);}
+        a.status='paid';}
       else if(command==='assignment.cancel'){admin();stage(a,['offered','accepted','submitted','changes','approved']);a.cancelReason=text(p.reason,500,3);a.status='cancelled';}
       else fail('statusInvalid');
+    } else if(command==='settings.affiliate'){
+      admin();const pool=money(num(p.pool,0,100)),creatorShare=money(num(p.creatorShare,0,pool));s.affiliate={pool,creatorShare};subject=pool+'% / '+creatorShare+'%';
     } else if(command==='settings.rates'){
       admin();for(const market of ['IL','US']){const r=p.rates?.[market];if(!r||r.distribution?.length!==5)fail('required');s.rates[market]={production:{},distribution:r.distribution.map(v=>money(num(v)))};['reel','story','blog'].forEach(k=>s.rates[market].production[k]=money(num(r.production[k])));}
       s.ratesVersion++;subject='v'+s.ratesVersion;
     }else fail('statusInvalid');
     s.revision++;s.updatedAt=now;s.activity.unshift({id:uid('log'),at:now,action:command,actor:actor.role,subject});s.activity=s.activity.slice(0,5000);validateState(s);return s;
   }
-  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses};
+  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor};
 });

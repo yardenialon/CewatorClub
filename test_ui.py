@@ -183,7 +183,7 @@ class DemoFlow(unittest.TestCase):
         self.nav("settings")
         self.page.locator('[data-action="reset"]').click()
         self.page.locator(".brandmark").wait_for()
-        self.assertEqual(len(self.state()["creators"]), 6)
+        self.assertEqual(len(self.state()["creators"]), 7)
         self.assertEqual(self.assignment("a2")["status"], "offered")
 
     def test_11_mobile_menu_toggle(self):
@@ -262,6 +262,39 @@ class DemoFlow(unittest.TestCase):
         # archived missions never reach the creator portal
         self.switch("creator")
         self.assertGreaterEqual(self.page.locator('[data-action="missionDetail"]').count(), 1)
+
+    def test_15_affiliate_offer_uses_no_budget(self):
+        self.switch("admin")
+        self.nav("missions")
+        self.page.locator('[data-action="missionDetail"][data-id="m3"]').first.click()
+        self.modal().wait_for()
+        self.page.locator('[data-action="offer"]').click()
+        self.page.locator("#offer-form").wait_for()
+        self.page.select_option('#offer-form select[name="creatorId"]', "c7")  # Tal Bites prefers products & commission
+        self.assertEqual(self.page.input_value('#offer-form select[name="deal"]'), "affiliate")
+        self.assertTrue(self.page.locator("#affiliate-section").is_visible())
+        self.assertFalse(self.page.locator("#fee-section").is_visible())
+        self.assertEqual(self.page.locator("#audience-discount").inner_text(), "10%")
+        self.page.fill('#offer-form input[name="creatorShare"]', "12")
+        self.assertEqual(self.page.locator("#audience-discount").inner_text(), "8%")
+        self.page.fill('#offer-form input[name="productPackage"]', "Starter pack: 3 boxes")
+        allocated_before = self.page.evaluate("() => window.ClubDemo.core.allocation(window.ClubDemo.getState(), 'm3')")
+        self.page.locator('#offer-form button[type="submit"]').click()
+        self.modal_closed()
+        a = self.state()["assignments"][-1]
+        self.assertEqual((a["deal"], a["creatorId"], a["missionId"], a["fees"]["total"]), ("affiliate", "c7", "m3", 0))
+        self.assertEqual((a["affiliate"]["creatorShare"], a["affiliate"]["audienceDiscount"]), (12, 8))
+        self.assertRegex(a["affiliate"]["promoCode"], r"^[A-Z0-9]{4,20}$")
+        self.assertEqual(self.page.evaluate("() => window.ClubDemo.core.allocation(window.ClubDemo.getState(), 'm3')"), allocated_before)
+
+    def test_16_ambassador_settings_apply_to_new_offers(self):
+        self.nav("settings")
+        self.page.locator("#affiliate-form").wait_for()
+        self.page.fill('#affiliate-form input[name="pool"]', "25")
+        self.page.fill('#affiliate-form input[name="creatorShare"]', "15")
+        self.page.locator('#affiliate-form button[type="submit"]').click()
+        self.page.locator("#toast:not(.hide)").wait_for()
+        self.assertEqual(self.state()["affiliate"], {"pool": 25, "creatorShare": 15})
 
     def test_99_no_javascript_errors(self):
         self.assertEqual(self.errors, [])
