@@ -4,8 +4,10 @@
     python build.py            write index.html
     python build.py --check    exit 1 if index.html is out of date (used by CI)
 
-Sources: styles.css, i18n.json, core.js, app.js. The page template lives here so
-that the prototype stays a single self-contained file with no external assets.
+Sources: styles.css, i18n.json, core.js, format.js and app/*.js (concatenated in
+file-name order inside one IIFE, so they share scope: 00-state.js first, 90-events.js
+last). The page template lives here so that the prototype stays a single
+self-contained file with no external assets.
 """
 import json
 import sys
@@ -33,6 +35,9 @@ TEMPLATE = """<!doctype html>
 <script>const TRANSLATIONS={i18n};</script>
 <script>
 {core}
+</script>
+<script>
+{format}
 </script>
 <script>
 {app}
@@ -65,12 +70,21 @@ def script(name: str) -> str:
     return code
 
 
+def app_bundle() -> str:
+    parts = sorted(p for p in (ROOT / "app").glob("*.js"))
+    if not parts:
+        sys.exit("app/ contains no .js files")
+    body = "\n\n".join(script(f"app/{p.name}") for p in parts)
+    return "/* Bilingual local prototype. All external actions are intentionally absent. */\n(function () {\n'use strict';\n" + body + "\n})();"
+
+
 def build() -> str:
     return TEMPLATE.format(
         styles=read("styles.css").strip(),
         i18n=load_i18n(),
         core=script("core.js"),
-        app=script("app.js"),
+        format=script("format.js"),
+        app=app_bundle(),
     )
 
 
