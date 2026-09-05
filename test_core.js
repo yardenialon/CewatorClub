@@ -1,13 +1,10 @@
 /**
- * Business-rule tests for src/core.js (no browser needed).
- *   npm test
+ * Business-rule tests for core.js (no browser needed, no dependencies).
+ *   node test_core.js
  */
-import { test, describe } from 'node:test';
-import assert from 'node:assert/strict';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
-const C = require('../src/core.js');
+const { test, describe } = require('node:test');
+const assert = require('node:assert/strict');
+const C = require('./core.js');
 
 const ADMIN = { role: 'admin' };
 const creatorActor = id => ({ role: 'creator', creatorId: id });

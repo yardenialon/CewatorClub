@@ -13,11 +13,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Bundle is up to date
-        run: npm run build:check
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: index.html matches the sources
+        run: python build.py --check
       - name: Business-rule tests
-        run: npm test
-      - name: Install Playwright (Chromium)
-        run: npm install --no-save playwright@1.56.1 && npx playwright install --with-deps chromium
+        run: node test_core.js
+      - name: Install Playwright (tests only)
+        run: pip install playwright==1.56.0 && python -m playwright install --with-deps chromium
       - name: Browser tests
-        run: npm run test:ui
+        run: python test_ui.py

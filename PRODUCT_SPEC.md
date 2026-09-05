@@ -34,7 +34,7 @@ offered ──accept──▶ accepted ──submit──▶ submitted ──app
 cancelled  (admin may cancel from offered / accepted / submitted / changes / approved)
 ```
 
-Guards enforced by `src/core.js`:
+Guards enforced by `core.js`:
 
 - Offers require an **active** creator with **verified metrics**, in the same market as the mission, before the deadline, with a free slot, no duplicate live assignment, and total fee within the remaining mission budget.
 - Accepting requires explicit consent; declining releases both the slot and the budget.
