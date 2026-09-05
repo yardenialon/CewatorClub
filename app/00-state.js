@@ -1,4 +1,5 @@
 /* Shared UI state, preferences and locale-aware formatters. Loaded first. */
+const APP_VERSION='0.2';
 const C=ClubCore, F=ClubFormat, KEY='simpliigood.creatorclub.v1', PREF='simpliigood.creatorclub.prefs';
 const $=sel=>document.querySelector(sel);
 const e=F.escapeHtml;
@@ -7,6 +8,7 @@ let loadError='', prefs={};
 try{prefs=JSON.parse(localStorage.getItem(PREF)||'{}');}catch(_){}
 let lang=prefs.lang==='en'?'en':'he', view='admin', page='dashboard', market='all', search='', creatorId='c3', modalReturnFocus=null;
 const query=new URLSearchParams(location.search);if(query.get('lang')==='en')lang='en';if(query.get('view')==='creator')view='creator';if(query.get('view')==='apply')view='apply';
+let showArchived=false;
 let state;
 try {const raw=localStorage.getItem(KEY);state=raw?JSON.parse(raw):C.createSeed();C.validateState(state);}catch(err){state=C.createSeed();loadError='invalidBackup';}
 function t(k){return TRANSLATIONS[lang][k]||k;}

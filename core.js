@@ -85,6 +85,7 @@
     for(const c of s.creators){
       if(typeof c.id!=='string'||ids.has(c.id)||!['IL','US'].includes(c.market)||!['active','pending','rejected'].includes(c.status)||!['Instagram','TikTok','Blog','Newsletter','YouTube'].includes(c.platform)) fail('invalidBackup');
       text(c.name,120,1);text(c.email,254,3);text(c.niche,300);https(c.url);num(c.audience,0,1000000000);num(c.engagement,0,100);num(c.fit,0,100);if(typeof c.metricsVerified!=='boolean')fail('invalidBackup');
+      if(c.rejectReason!==undefined)text(c.rejectReason,500);
       ids.add(c.id);cids.set(c.id,c);
     }
     for(const m of s.missions){
@@ -92,6 +93,7 @@
       if(m.titleKey&&!['seedMission1','seedMission2','seedMission3','seedMission4'].includes(m.titleKey))fail('invalidBackup');
       if(!m.titleKey)text(m.title,150,3); if(m.briefKey&&m.briefKey!=='briefDefault')fail('invalidBackup'); if(!m.briefKey)text(m.brief,5000,10);
       text(m.cta,300);num(m.budget,0.01);num(m.capacity,1,500);if(!Number.isInteger(m.capacity)||!/^\d{4}-\d{2}-\d{2}$/.test(m.deadline))fail('invalidBackup');
+      if(m.archived!==undefined&&m.archived!==true)fail('invalidBackup');
       ids.add(m.id);mids.set(m.id,m);
     }
     const pairs=new Set();
@@ -111,7 +113,10 @@
       if(a.status!=='cancelled'){const key=a.missionId+'|'+a.creatorId;if(pairs.has(key))fail('invalidBackup');pairs.add(key);}
       ids.add(a.id);
     }
-    for(const m of s.missions) if(allocation(s,m.id)>m.budget+0.001||missionCount(s,m.id)>m.capacity) fail('invalidBackup');
+    for(const m of s.missions){
+      if(allocation(s,m.id)>m.budget+0.001||missionCount(s,m.id)>m.capacity) fail('invalidBackup');
+      if(m.archived&&s.assignments.some(a=>a.missionId===m.id&&!['paid','cancelled'].includes(a.status))) fail('invalidBackup');
+    }
     return true;
   }
   function dispatch(original, command, p, actor={role:'admin'}) {
@@ -126,19 +131,39 @@
       const email=text(p.email,254,3);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail('required');
       const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url:https(p.url),status:'pending',metricsVerified:false,createdAt:now};
       if(!Number.isInteger(c.audience))fail('required');s.creators.push(c);subject=c.name;
-    } else if(command==='creator.approve'||command==='creator.verify'){
+    } else if(command==='creator.approve'||command==='creator.verify'||command==='creator.reject'){
       admin();const c=s.creators.find(x=>x.id===p.id);if(!c)fail('required');
-      if(command==='creator.approve'){if(c.status!=='pending')fail('statusInvalid');c.status='active';}else{if(!p.confirmed)fail('consentRequired');c.metricsVerified=true;c.metricsCheckedAt=now;}
+      if(command==='creator.approve'){if(c.status!=='pending')fail('statusInvalid');c.status='active';delete c.rejectReason;delete c.rejectedAt;}
+      else if(command==='creator.reject'){if(c.status!=='pending')fail('statusInvalid');c.rejectReason=text(p.reason,500,3);c.rejectedAt=now;c.status='rejected';}
+      else{if(!p.confirmed)fail('consentRequired');c.metricsVerified=true;c.metricsCheckedAt=now;}
       subject=c.name;
     } else if(command==='mission.create'){
       admin(); if(!['IL','US'].includes(p.market)||!['reel','story','blog'].includes(p.type)||!['dtc','retail','education'].includes(p.objective))fail('required');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||p.deadline<today())fail('dateInvalid');
       const m={id:uid('m'),title:text(p.title,150,3),market:p.market,type:p.type,objective:p.objective,budget:money(num(p.budget,0.01)),capacity:num(p.capacity,1,500),deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),createdAt:now};
       if(!Number.isInteger(m.capacity))fail('budgetPositive');s.missions.push(m);subject=m.title;
+    } else if(command==='mission.update'){
+      admin();const m=s.missions.find(x=>x.id===p.id);if(!m)fail('required');if(m.archived)fail('missionArchived');
+      if(!['reel','story','blog'].includes(p.type)||!['dtc','retail','education'].includes(p.objective))fail('required');
+      const live=missionCount(s,m.id);
+      if(p.type!==m.type&&live>0)fail('typeLocked');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||(p.deadline!==m.deadline&&p.deadline<today()))fail('dateInvalid');
+      const budget=money(num(p.budget,0.01)),capacity=num(p.capacity,1,500);if(!Number.isInteger(capacity))fail('budgetPositive');
+      if(budget<allocation(s,m.id)-0.001)fail('budgetBelowAllocated');if(capacity<live)fail('capacityBelowAssigned');
+      Object.assign(m,{title:text(p.title,150,3),type:p.type,objective:p.objective,budget,capacity,deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),updatedAt:now});
+      delete m.titleKey;delete m.briefKey;subject=m.title;
+    } else if(command==='mission.archive'||command==='mission.restore'){
+      admin();const m=s.missions.find(x=>x.id===p.id);if(!m)fail('required');
+      if(command==='mission.archive'){
+        if(m.archived)fail('statusInvalid');
+        if(s.assignments.some(a=>a.missionId===m.id&&!['paid','cancelled'].includes(a.status)))fail('missionHasOpenWork');
+        m.archived=true;m.archivedAt=now;
+      } else {if(!m.archived)fail('statusInvalid');delete m.archived;delete m.archivedAt;}
+      subject=m.title||m.titleKey;
     } else if(command==='assignment.offer'){
       admin();const c=s.creators.find(x=>x.id===p.creatorId),m=s.missions.find(x=>x.id===p.missionId);
       if(!c||!m||c.status!=='active'||c.market!==m.market)fail('required');if(!c.metricsVerified)fail('unverifiedBlocked');
-      if(m.deadline<today())fail('deadlinePassed');
+      if(m.archived)fail('missionArchived');if(m.deadline<today())fail('deadlinePassed');
       if(s.assignments.some(a=>a.creatorId===c.id&&a.missionId===m.id&&a.status!=='cancelled'))fail('duplicateAssignment');
       if(missionCount(s,m.id)>=m.capacity)fail('noSlots');
       const f={production:money(num(p.production)),distribution:money(num(p.distribution)),rights:money(num(p.rights)),currency:currency(m.market)};f.total=money(f.production+f.distribution+f.rights);

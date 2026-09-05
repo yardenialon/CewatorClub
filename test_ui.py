@@ -195,7 +195,75 @@ class DemoFlow(unittest.TestCase):
         toggle.click()
         self.assertIn("open", self.page.get_attribute("#sidebar", "class"))
 
-    def test_12_no_javascript_errors(self):
+    def test_12_reject_applicant(self):
+        self.page.set_viewport_size({"width": 1280, "height": 900})
+        self.page.reload()
+        self.page.locator(".brandmark").wait_for()
+        self.switch("admin")
+        self.nav("creators")
+        self.page.locator('[data-action="creatorDetail"][data-id="c5"]').click()  # Lia Fresh / Demo, pending
+        self.modal().wait_for()
+        self.page.locator('[data-action="rejectCreator"]').click()  # confirm + prompt are auto-accepted
+        self.modal_closed()
+        c = next(c for c in self.state()["creators"] if c["id"] == "c5")
+        self.assertEqual(c["status"], "rejected")
+        self.assertEqual(c["rejectReason"], "Demo cancellation")
+
+    def test_13_edit_mission_respects_allocated_budget(self):
+        self.nav("missions")
+        self.page.locator('[data-action="missionDetail"][data-id="m1"]').first.click()
+        self.modal().wait_for()
+        self.page.locator('[data-action="editMission"]').click()
+        self.page.locator('#mission-form[data-id="m1"]').wait_for()
+        self.assertEqual(self.page.locator('#mission-form select[name="market"]').count(), 0)  # market locked
+        self.page.fill('#mission-form input[name="title"]', "Edited mission")
+        self.page.fill('#mission-form input[name="budget"]', "1")
+        self.page.locator('#mission-form button[type="submit"]').click()
+        self.page.locator("#modal-errors:not(.hide)").wait_for()
+        self.page.fill('#mission-form input[name="budget"]', "4000")
+        self.page.locator('#mission-form button[type="submit"]').click()
+        self.modal_closed()
+        m = next(m for m in self.state()["missions"] if m["id"] == "m1")
+        self.assertEqual(m["title"], "Edited mission")
+        self.assertEqual(m["budget"], 4000)
+        self.assertNotIn("titleKey", m)
+
+    def test_14_archive_and_restore_mission(self):
+        # m1 has open work: archiving must fail with an inline error
+        self.page.locator('[data-action="missionDetail"][data-id="m1"]').first.click()
+        self.modal().wait_for()
+        self.page.locator('[data-action="archiveMission"]').click()
+        self.page.locator("#modal-errors:not(.hide)").wait_for()
+        self.page.keyboard.press("Escape")
+        self.modal_closed()
+        # a fresh mission can be archived, disappears from the list, and comes back on restore
+        self.page.locator('[data-action="newMission"]').first.click()
+        self.modal().wait_for()
+        self.page.fill('#mission-form input[name="title"]', "Archive me")
+        self.page.fill('#mission-form input[name="cta"]', "Visit the demo page")
+        self.page.locator('#mission-form button[type="submit"]').click()
+        self.modal_closed()
+        mid = self.state()["missions"][-1]["id"]
+        card = self.page.locator(f'[data-action="missionDetail"][data-id="{mid}"]')
+        card.first.click()
+        self.modal().wait_for()
+        self.page.locator('[data-action="archiveMission"]').click()
+        self.modal_closed()
+        self.assertTrue(next(m for m in self.state()["missions"] if m["id"] == mid)["archived"])
+        self.assertEqual(card.count(), 0)
+        self.page.locator('[data-action="toggleArchived"]').click()
+        self.assertEqual(card.count(), 1)
+        card.first.click()
+        self.modal().wait_for()
+        self.assertEqual(self.page.locator('[data-action="offer"]').count(), 0)
+        self.page.locator('[data-action="restoreMission"]').click()
+        self.modal_closed()
+        self.assertNotIn("archived", next(m for m in self.state()["missions"] if m["id"] == mid))
+        # archived missions never reach the creator portal
+        self.switch("creator")
+        self.assertGreaterEqual(self.page.locator('[data-action="missionDetail"]').count(), 1)
+
+    def test_99_no_javascript_errors(self):
         self.assertEqual(self.errors, [])
 
 

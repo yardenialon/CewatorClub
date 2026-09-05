@@ -276,6 +276,130 @@ describe('assignment state machine', () => {
   });
 });
 
+describe('creator rejection', () => {
+  test('admin rejects a pending applicant with a reason', () => {
+    const s = C.createSeed();
+    const next = C.dispatch(s, 'creator.reject', { id: 'c5', reason: 'Audience outside target markets' }, ADMIN);
+    const c = next.creators.find(c => c.id === 'c5');
+    assert.equal(c.status, 'rejected');
+    assert.equal(c.rejectReason, 'Audience outside target markets');
+    assert.ok(c.rejectedAt);
+    assert.equal(next.activity[0].action, 'creator.reject');
+    assert.equal(C.validateState(next), true);
+  });
+
+  test('rejection needs a reason, an admin and a pending creator', () => {
+    const s = C.createSeed();
+    fails(() => C.dispatch(s, 'creator.reject', { id: 'c5', reason: '' }, ADMIN), 'required');
+    fails(() => C.dispatch(s, 'creator.reject', { id: 'c5', reason: 'No' }, creatorActor('c1')), 'statusInvalid');
+    fails(() => C.dispatch(s, 'creator.reject', { id: 'c1', reason: 'Already active' }, ADMIN), 'statusInvalid');
+    const rejected = C.dispatch(s, 'creator.reject', { id: 'c5', reason: 'Off brand' }, ADMIN);
+    fails(() => C.dispatch(rejected, 'creator.approve', { id: 'c5' }, ADMIN), 'statusInvalid');
+    fails(() => validOffer(rejected, 'c5', 'm1'), 'required');
+  });
+});
+
+describe('mission editing', () => {
+  const edit = (s, id, extra = {}) => {
+    const m = s.missions.find(x => x.id === id);
+    const p = { id, title: 'Edited title', type: m.type, objective: m.objective, budget: m.budget, capacity: m.capacity, deadline: m.deadline, brief: 'An edited brief that is long enough.', cta: 'Edited CTA', ...extra };
+    return C.dispatch(s, 'mission.update', p, ADMIN);
+  };
+
+  test('admin edits title, budget, capacity, deadline, brief and CTA', () => {
+    const s = C.createSeed();
+    const next = edit(s, 'm1', { budget: 5000, capacity: 8, deadline: C.future(60), objective: 'education' });
+    const m = next.missions.find(x => x.id === 'm1');
+    assert.equal(m.title, 'Edited title');
+    assert.equal(m.titleKey, undefined); // seed key replaced by a real title
+    assert.equal(m.briefKey, undefined);
+    assert.equal(m.budget, 5000);
+    assert.equal(m.capacity, 8);
+    assert.equal(m.objective, 'education');
+    assert.ok(m.updatedAt);
+    assert.equal(C.validateState(next), true);
+  });
+
+  test('budget and capacity cannot drop below what is already allocated', () => {
+    const s = C.createSeed(); // m1 has a1 allocated
+    const allocated = C.allocation(s, 'm1');
+    assert.ok(allocated > 0);
+    fails(() => edit(s, 'm1', { budget: allocated - 1 }), 'budgetBelowAllocated');
+    assert.doesNotThrow(() => edit(s, 'm1', { budget: allocated }));
+    fails(() => edit(s, 'm1', { capacity: 0 }), 'minPrice');
+  });
+
+  test('capacity below current assignments is rejected', () => {
+    let s = C.dispatch(C.createSeed(), 'creator.approve', { id: 'c5' }, ADMIN);
+    s = C.dispatch(s, 'creator.verify', { id: 'c5', confirmed: true }, ADMIN);
+    s = validOffer(s, 'c5', 'm1'); // m1 now has 2 assignments
+    fails(() => edit(s, 'm1', { capacity: 1 }), 'capacityBelowAssigned');
+    assert.doesNotThrow(() => edit(s, 'm1', { capacity: 2 }));
+  });
+
+  test('format is locked once creators are assigned, free otherwise', () => {
+    const s = C.createSeed();
+    fails(() => edit(s, 'm1', { type: 'story' }), 'typeLocked');
+    const freed = C.dispatch(s, 'assignment.decline', { id: 'a2' }, creatorActor('c3')); // m2 now empty
+    assert.equal(edit(freed, 'm2', { type: 'story' }).missions.find(x => x.id === 'm2').type, 'story');
+  });
+
+  test('deadline may stay as is but a new one cannot be in the past', () => {
+    const s = C.createSeed();
+    fails(() => edit(s, 'm1', { deadline: '2000-01-01' }), 'dateInvalid');
+    fails(() => edit(s, 'm1', { deadline: 'soon' }), 'dateInvalid');
+    const past = { ...s, missions: s.missions.map(m => m.id === 'm1' ? { ...m, deadline: '2020-01-01' } : m) };
+    assert.doesNotThrow(() => edit(past, 'm1')); // unchanged past deadline is tolerated
+  });
+
+  test('only an admin can edit, and the mission must exist', () => {
+    const s = C.createSeed();
+    fails(() => C.dispatch(s, 'mission.update', { id: 'm1' }, creatorActor('c1')), 'statusInvalid');
+    fails(() => C.dispatch(s, 'mission.update', { id: 'nope', title: 'x', type: 'reel', objective: 'dtc', budget: 1, capacity: 1, deadline: C.future(1), brief: 'long enough brief', cta: 'go' }, ADMIN), 'required');
+  });
+});
+
+describe('mission archive / restore', () => {
+  test('a mission with open work cannot be archived', () => {
+    const s = C.createSeed();
+    fails(() => C.dispatch(s, 'mission.archive', { id: 'm1' }, ADMIN), 'missionHasOpenWork'); // a1 submitted
+    fails(() => C.dispatch(s, 'mission.archive', { id: 'm4' }, ADMIN), 'missionHasOpenWork'); // a4 published
+  });
+
+  test('archive hides the mission from offers; restore reopens it', () => {
+    let s = C.dispatch(C.createSeed(), 'assignment.decline', { id: 'a2' }, creatorActor('c3')); // m2 has only a cancelled assignment
+    s = C.dispatch(s, 'mission.archive', { id: 'm2' }, ADMIN);
+    const m = s.missions.find(x => x.id === 'm2');
+    assert.equal(m.archived, true);
+    assert.ok(m.archivedAt);
+    assert.equal(C.validateState(s), true);
+    fails(() => validOffer(s, 'c4', 'm2'), 'missionArchived');
+    fails(() => C.dispatch(s, 'mission.update', { id: 'm2', title: 'x', type: 'reel', objective: 'dtc', budget: 1, capacity: 1, deadline: C.future(1), brief: 'long enough brief', cta: 'go' }, ADMIN), 'missionArchived');
+    fails(() => C.dispatch(s, 'mission.archive', { id: 'm2' }, ADMIN), 'statusInvalid');
+    fails(() => C.dispatch(s, 'mission.restore', { id: 'm1' }, ADMIN), 'statusInvalid');
+    s = C.dispatch(s, 'mission.restore', { id: 'm2' }, ADMIN);
+    assert.equal(s.missions.find(x => x.id === 'm2').archived, undefined);
+    assert.doesNotThrow(() => validOffer(s, 'c4', 'm2'));
+  });
+
+  test('archiving keeps financial history intact', () => {
+    let s = C.dispatch(C.createSeed(), 'assignment.decline', { id: 'a2' }, creatorActor('c3'));
+    const before = C.stats(s, 'US');
+    s = C.dispatch(s, 'mission.archive', { id: 'm2' }, ADMIN);
+    assert.deepEqual(C.stats(s, 'US'), before);
+    assert.equal(s.missions.length, 4);
+  });
+
+  test('backup validation rejects an archived mission with open work', () => {
+    const s = C.createSeed();
+    s.missions[0].archived = true;
+    fails(() => C.validateState(s), 'invalidBackup');
+    const s2 = C.createSeed();
+    s2.missions[0].archived = 'yes';
+    fails(() => C.validateState(s2), 'invalidBackup');
+  });
+});
+
 describe('validateState (backup import)', () => {
   const tampered = (mutate) => {
     const s = C.createSeed();

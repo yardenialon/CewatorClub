@@ -1,16 +1,16 @@
-# SimpliiGood Creator Club — Product Spec (v0.1)
+# SimpliiGood Creator Club — Product Spec (v0.2)
 
 Bilingual (HE/EN) prototype for running a creator & ambassador programme for a
 frozen-food brand in two markets: Israel (ILS) and the United States (USD).
 
-This document describes what v0.1 does, the rules it enforces, and what is
+This document describes what v0.2 does, the rules it enforces, and what is
 deliberately **not** built yet. The Hebrew user guide lives in `GUIDE_HE.md`.
 
 ## 1. Roles
 
 | Role | How it is represented in v0.1 | Can do |
 |------|-------------------------------|--------|
-| Programme admin | "מנהל התוכנית" view toggle | Approve applicants, verify audience metrics, create missions, make offers, review content, verify publication, record payments, edit rate cards, export/import backups |
+| Programme admin | "מנהל התוכנית" view toggle | Approve or reject applicants, verify audience metrics, create, edit and archive missions, make offers, review content, verify publication, record payments, edit rate cards, export/import backups |
 | Creator | "פורטל יוצרים" view toggle + profile picker | Accept/decline offers, submit content links, resubmit after feedback, report publication |
 | Public applicant | Application form | Submit an application (stored as *pending*) |
 
@@ -18,8 +18,8 @@ Role switching is a demo affordance. There is no authentication.
 
 ## 2. Core entities
 
-- **Creator** — market, platform (Instagram / TikTok / YouTube / Blog / Newsletter), audience size, engagement %, brand fit %, niche, portfolio URL, status (`pending` → `active` / `rejected`), `metricsVerified` flag.
-- **Mission** — market, format (`reel` / `story` / `blog`), objective (`dtc` / `retail` / `education`), budget, capacity (number of creators), deadline, brief, CTA.
+- **Creator** — market, platform (Instagram / TikTok / YouTube / Blog / Newsletter), audience size, engagement %, brand fit %, niche, portfolio URL, status (`pending` → `active` / `rejected`, rejection carries a reason), `metricsVerified` flag.
+- **Mission** — market, format (`reel` / `story` / `blog`), objective (`dtc` / `retail` / `education`), budget, capacity (number of creators), deadline, brief, CTA, optional `archived` flag.
 - **Assignment** — the contract between one creator and one mission. Carries locked fees (`production`, `distribution`, `rights`, `total`, `currency`), the status below, content and publication URLs, review checks and history, and a manual payment record.
 - **Rates** — per-market rate card (production fee per format, five distribution tiers by audience size). Versioned; changing rates only affects *new* quotes.
 - **Activity log** — append-only audit trail of every command (capped at 5,000 entries).
@@ -42,7 +42,16 @@ Guards enforced by `core.js`:
 - Approval requires all four brand-safety checks (product shown, no medical claims, rights, disclosure).
 - Verification of publication and recording of payment each require an explicit confirmation.
 - Payment record needs a reference (3–100 chars). It is a **manual note**, not a money transfer.
-- Only the admin role can approve creators, create missions, review, verify, record and cancel; only the owning creator can accept, decline, submit and publish.
+- Only the admin role can approve/reject creators, create/edit/archive missions, review, verify, record and cancel; only the owning creator can accept, decline, submit and publish.
+
+### Mission editing and archiving (v0.2)
+
+- Market (and therefore currency) is fixed at creation.
+- Format can change only while no creator is assigned, because fees depend on it.
+- Budget cannot go below the amount already allocated; capacity cannot go below the number of live assignments.
+- A changed deadline must not be in the past; an unchanged past deadline is tolerated so other fields stay editable.
+- Editing a seeded mission replaces its translated title/brief keys with the entered text.
+- A mission can be archived only when every assignment is `paid` or `cancelled`. Archived missions are hidden from the creator portal and the dashboard preview, refuse new offers and edits, keep all financial history, and can be restored.
 
 ## 4. Pricing formula
 
@@ -109,7 +118,7 @@ ILS and USD are never summed together.
 
 | Phase | Goal |
 |-------|------|
-| 0.2 | Split `app.js` into view modules; add creator rejection; add mission editing/archiving; unit-test UI helpers |
+| 0.2 ✅ | Split `app.js` into view modules; creator rejection; mission editing/archiving; unit tests for UI helpers (`format.js`) |
 | 0.3 | Backend (Supabase/Postgres or similar) with the same command/dispatch model; magic-link auth for creators |
 | 0.4 | Email notifications; file upload for drafts; contract acceptance record |
 | 0.5 | Instagram/TikTok API metric checks; payout provider integration |

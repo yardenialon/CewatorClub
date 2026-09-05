@@ -12,11 +12,16 @@ document.addEventListener('click',event=>{
  else if(a==='missionDetail')missionDetail(id);
  else if(a==='creatorDetail')creatorDetail(id);
  else if(a==='approveCreator')act('creator.approve',{id});
+ else if(a==='rejectCreator'){if(confirm(t('rejectConfirm'))){const reason=prompt(t('rejectReason'),'');if(reason)act('creator.reject',{id,reason});}}
+ else if(a==='editMission')editMission(id);
+ else if(a==='archiveMission'){if(confirm(t('archiveConfirm')))act('mission.archive',{id});}
+ else if(a==='restoreMission')act('mission.restore',{id});
+ else if(a==='toggleArchived'){showArchived=!showArchived;render();}
  else if(a==='verifyMetrics'){if(confirm(t('manualOnly')+'\n\n'+t('verifyMetrics')+'?'))act('creator.verify',{id,confirmed:true});}
  else if(a==='offer')offerMission(id);
  else if(a==='work')workModal(id);
  else if(a==='apply'){view='apply';closeModal();render();window.scrollTo(0,0);}
- else if(a==='buildBrief'){const f=$('#mission-form'),l=f.elements.market.value==='US'?'en':'he';f.elements.brief.value=TRANSLATIONS[l].briefDefault;toast(t('briefGenerated'));}
+ else if(a==='buildBrief'){const f=$('#mission-form'),l=(f.elements.market?f.elements.market.value:f.dataset.market)==='US'?'en':'he';f.elements.brief.value=TRANSLATIONS[l].briefDefault;toast(t('briefGenerated'));}
  else if(a==='scroll-work')$('#my-work')?.scrollIntoView({behavior:'smooth',block:'start'});
  else if(a==='cancelWork'){if(confirm(t('cancelConfirm'))){const reason=prompt(t('cancelReason'),'Demo cancellation');if(reason)act('assignment.cancel',{id,reason});}}
  else if(a==='decline'){if(confirm(t('declineConfirm')))act('assignment.decline',{id});}
@@ -35,7 +40,7 @@ document.addEventListener('change',async event=>{
 });
 document.addEventListener('submit',event=>{
  const f=event.target;if(!(f instanceof HTMLFormElement))return;event.preventDefault();const p=data(f),id=f.dataset.id;
- if(f.id==='mission-form')act('mission.create',p);
+ if(f.id==='mission-form')act(id?'mission.update':'mission.create',id?{...p,id}:p);
  else if(f.id==='offer-form')act('assignment.offer',{...p,missionId:f.dataset.mission});
  else if(f.id==='accept-form')act('assignment.accept',{id,confirmed:f.elements.confirmed.checked});
  else if(f.id==='content-form')act('assignment.submit',{id,...p});

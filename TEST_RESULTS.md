@@ -1,4 +1,4 @@
-# TEST_RESULTS — SimpliiGood Creator Club v0.1
+# TEST_RESULTS — SimpliiGood Creator Club v0.2
 
 Last run: 2026-09-05, Linux, Node 22, Python 3.11, Chromium 1194 (Playwright 1.56).
 Both suites run automatically in GitHub Actions on every push (`.github/workflows/ci.yml`).
@@ -8,8 +8,9 @@ Both suites run automatically in GitHub Actions on every push (`.github/workflow
 | Suite | Command | Result |
 |-------|---------|--------|
 | Bundle freshness | `python build.py --check` | pass |
-| Business rules | `node test_core.js` | 30 / 30 pass |
-| Browser flow | `python test_ui.py` | 12 / 12 pass |
+| Business rules | `node test_core.js` | 42 / 42 pass |
+| Formatting helpers | `node test_format.js` | 15 / 15 pass |
+| Browser flow | `python test_ui.py` | 15 / 15 pass |
 
 ## What `test_core.js` covers (no browser)
 
@@ -21,6 +22,9 @@ Both suites run automatically in GitHub Actions on every push (`.github/workflow
 - Offers: budget reservation; blocked for pending, unverified, cross-market or duplicate creators; blocked over budget, over capacity, or at zero fee; admin only; fees frozen against later rate-card changes.
 - Full state machine offered → accepted → submitted → changes → submitted → approved → published → payable → paid, including every guard on the way (consent, https, four checks, feedback required, confirmations, reference length) and role checks (creator cannot act on another creator's work).
 - Decline releases slot and budget; admin cancel needs a reason and is impossible after publication; unknown commands / ids are rejected.
+- Creator rejection: reason required, admin only, pending only; a rejected creator cannot be approved or offered.
+- Mission editing: title/objective/budget/capacity/deadline/brief/CTA; budget and capacity floors; format locked once assigned; past deadline rules; admin only; seeded title keys replaced.
+- Mission archive / restore: blocked while work is open; archived missions refuse offers and edits; restore reopens; financial stats unchanged; backup validation rejects an archived mission with open work.
 - `validateState` rejects wrong versions, structural damage, inconsistent totals, wrong currency, over-allocation, insecure URLs and duplicate creator/mission pairs; accepts states produced by the app.
 
 ## What `test_ui.py` covers (headless Chromium, real localStorage over 127.0.0.1)
@@ -36,7 +40,14 @@ Both suites run automatically in GitHub Actions on every push (`.github/workflow
 9. Public application form stores a pending creator.
 10. Reset restores the seed.
 11. Mobile viewport (390 px) shows the menu toggle and opens the sidebar.
-12. No JavaScript errors or console errors during the whole run.
+12. Admin rejects a pending applicant through the confirm + reason prompts.
+13. Edit mission: market field is locked; a budget below the allocated amount is refused inline; a valid edit is saved.
+14. Archive: refused on a mission with open work; a fresh mission is archived, disappears from the list, reappears under "show archived" without an offer button, and is restored.
+15. No JavaScript errors or console errors during the whole run.
+
+## What `test_format.js` covers
+
+HTML escaping, initials, currency/number/date formatting per locale, CSV quoting and formula-injection protection, CSV assembly with BOM and CRLF.
 
 ## Not yet verified
 
