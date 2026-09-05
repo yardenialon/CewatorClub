@@ -18,6 +18,8 @@
   function num(v, min=0, max=10000000) { if(v===''||v===null||v===undefined||typeof v==='boolean') fail('minPrice'); const n=Number(v); if(!Number.isFinite(n)||n<min||n>max) fail('minPrice'); return n; }
   function https(v) { try { const u=new URL(v); if(u.protocol!=='https:'||!u.hostname||u.username||u.password) fail('unsafeUrl'); return u.href; } catch(e){ fail('unsafeUrl'); } }
   const CODE=/^[A-Z0-9]{4,20}$/;
+  const LINK_KEYS=['instagram','tiktok','youtube','facebook','website'];
+  function cleanLinks(raw){ const out={}; if(raw&&typeof raw==='object'&&!Array.isArray(raw)) for(const k of LINK_KEYS){ const v=raw[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='') out[k]=https(String(v).trim()); } return out; }
   function affiliateConfig(s){ const a=s.affiliate||{}; return {pool:Number.isFinite(a.pool)?a.pool:20, creatorShare:Number.isFinite(a.creatorShare)?a.creatorShare:10}; }
   function promoCodeFor(s, creator, share){
     const base=(String(creator?.name||'').split(/[\s/]+/)[0].replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,8)||'CLUB');
@@ -98,10 +100,11 @@
       ['reel','story','blog'].forEach(k=>num(s.rates[m].production[k])); s.rates[m].distribution.forEach(v=>num(v));
     }
     for(const c of s.creators){
-      if(typeof c.id!=='string'||ids.has(c.id)||!['IL','US'].includes(c.market)||!['active','pending','rejected'].includes(c.status)||!['Instagram','TikTok','Blog','Newsletter','YouTube'].includes(c.platform)) fail('invalidBackup');
+      if(typeof c.id!=='string'||ids.has(c.id)||!['IL','US'].includes(c.market)||!['active','pending','rejected'].includes(c.status)||!['Instagram','TikTok','YouTube','Facebook','Blog','Newsletter'].includes(c.platform)) fail('invalidBackup');
       text(c.name,120,1);text(c.email,254,3);text(c.niche,300);https(c.url);num(c.audience,0,1000000000);num(c.engagement,0,100);num(c.fit,0,100);if(typeof c.metricsVerified!=='boolean')fail('invalidBackup');
       if(c.rejectReason!==undefined)text(c.rejectReason,500);
       if(c.dealPreference!==undefined&&!['fee','affiliate','either'].includes(c.dealPreference))fail('invalidBackup');
+      if(c.links!==undefined){if(!c.links||typeof c.links!=='object'||Array.isArray(c.links))fail('invalidBackup');for(const [k,v] of Object.entries(c.links)){if(!LINK_KEYS.includes(k))fail('invalidBackup');https(v);}}
       ids.add(c.id);cids.set(c.id,c);
     }
     for(const m of s.missions){
@@ -151,10 +154,12 @@
     const stage=(a,allowed)=>{if(!allowed.includes(a.status))fail('statusInvalid');a.updatedAt=now;};
     if(command==='creator.apply'){
       if(!p.consent)fail('consentRequired');
-      if(!['IL','US'].includes(p.market)||!['Instagram','TikTok','Blog','Newsletter','YouTube'].includes(p.platform))fail('required');
+      if(!['IL','US'].includes(p.market)||!['Instagram','TikTok','YouTube','Facebook','Blog','Newsletter'].includes(p.platform))fail('required');
       const email=text(p.email,254,3);if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail('required');
       const dealPreference=p.dealPreference||'either';if(!['fee','affiliate','either'].includes(dealPreference))fail('required');
-      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url:https(p.url),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
+      const links=cleanLinks(p.links);const primary={Instagram:'instagram',TikTok:'tiktok',YouTube:'youtube',Facebook:'facebook'}[p.platform]||'website';
+      const url=p.url?https(p.url):(links[primary]||Object.values(links)[0]);if(!url)fail('unsafeUrl');
+      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url,...(Object.keys(links).length?{links}:{}),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
       if(!Number.isInteger(c.audience))fail('required');s.creators.push(c);subject=c.name;
     } else if(command==='creator.approve'||command==='creator.verify'||command==='creator.reject'){
       admin();const c=s.creators.find(x=>x.id===p.id);if(!c)fail('required');
@@ -231,5 +236,5 @@
     }else fail('statusInvalid');
     s.revision++;s.updatedAt=now;s.activity.unshift({id:uid('log'),at:now,action:command,actor:actor.role,subject});s.activity=s.activity.slice(0,5000);validateState(s);return s;
   }
-  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor};
+  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor,LINK_KEYS};
 });

@@ -161,23 +161,60 @@ class DemoFlow(unittest.TestCase):
         self.assertEqual(len(missions), before + 1)
         self.assertEqual(missions[-1]["title"], "UI test mission")
 
-    def test_09_application_form_stores_pending_creator(self):
+    def wiz_type(self, value):
+        self.page.fill("#wiz-input", value)
+        self.page.keyboard.press("Enter")
+
+    def wiz_pick(self, name, value):
+        self.page.locator(f'[data-action="wizChoice"][data-name="{name}"][data-value="{value}"]').click()
+
+    def test_09_application_wizard_stores_pending_creator(self):
         page = self.page
         page.locator('[data-action="apply"]').first.click()
-        page.locator("#apply-form").wait_for()
-        page.fill('#apply-form input[name="name"]', "UI Applicant / Demo")
-        page.fill('#apply-form input[name="email"]', "ui@example.test")
-        page.fill('#apply-form input[name="audience"]', "5000")
-        page.fill('#apply-form input[name="engagement"]', "3")
-        page.fill('#apply-form input[name="fit"]', "70")
-        page.fill('#apply-form input[name="niche"]', "UI testing")
-        page.fill('#apply-form input[name="url"]', "https://example.com/ui")
-        page.locator('#apply-form input[name="consent"]').check()
-        page.locator('#apply-form button[type="submit"]').click()
-        page.locator("#creator-table").wait_for()
+        page.locator('.wizard-card[data-step="intro"]').wait_for()
+        page.locator('[data-action="wizNext"]').click()
+        page.locator('.wizard-card[data-step="name"]').wait_for()
+        page.keyboard.press("Enter")  # empty name -> inline error, stays on the step
+        page.locator(".wiz-error").wait_for()
+        self.wiz_type("UI Applicant / Demo")
+        page.locator('.wizard-card[data-step="email"]').wait_for()
+        self.wiz_type("ui@example.test")
+        page.locator('.wizard-card[data-step="market"]').wait_for()
+        self.wiz_pick("market", "IL")
+        page.locator('.wizard-card[data-step="links"]').wait_for()
+        page.locator('[data-action="wizNext"]').click()  # no links -> error
+        page.locator(".wiz-error").wait_for()
+        page.fill("#wiz-link-instagram", "https://instagram.com/ui.demo")
+        page.fill("#wiz-link-tiktok", "https://tiktok.com/@ui.demo")
+        page.keyboard.press("Enter")
+        page.locator('.wizard-card[data-step="platform"]').wait_for()
+        self.wiz_pick("platform", "TikTok")
+        page.locator('.wizard-card[data-step="audience"]').wait_for()
+        self.wiz_type("5,000")
+        page.locator('.wizard-card[data-step="engagement"]').wait_for()
+        self.wiz_pick("engagement", "4")
+        page.locator('.wizard-card[data-step="niche"]').wait_for()
+        self.wiz_type("UI testing recipes")
+        page.locator('.wizard-card[data-step="fit"]').wait_for()
+        self.wiz_pick("fit", "80")
+        page.locator('.wizard-card[data-step="deal"]').wait_for()
+        self.wiz_pick("dealPreference", "affiliate")
+        page.locator('.wizard-card[data-step="consent"]').wait_for()
+        self.assertIn("UI Applicant / Demo", page.locator(".wiz-summary").inner_text())
+        page.locator('#wiz-form button[type="submit"]').click()
+        page.locator(".wiz-error").wait_for()  # consent not ticked
+        page.locator('#wiz-form input[name="consent"]').check()
+        page.locator('#wiz-form button[type="submit"]').click()
+        page.locator("#wiz-done").wait_for()
         c = self.state()["creators"][-1]
         self.assertEqual(c["name"], "UI Applicant / Demo")
         self.assertEqual(c["status"], "pending")
+        self.assertEqual(c["platform"], "TikTok")
+        self.assertEqual(c["url"], "https://tiktok.com/@ui.demo")
+        self.assertEqual(c["links"]["instagram"], "https://instagram.com/ui.demo")
+        self.assertEqual((c["audience"], c["engagement"], c["fit"], c["dealPreference"]), (5000, 4, 80, "affiliate"))
+        page.locator("#wiz-done").click()
+        page.locator("#creator-table").wait_for()
 
     def test_10_reset_restores_seed(self):
         self.nav("settings")

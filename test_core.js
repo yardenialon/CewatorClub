@@ -128,6 +128,27 @@ describe('creator lifecycle', () => {
   });
 });
 
+describe('application links', () => {
+  const base = { name: 'Linked Creator / Demo', email: 'linked@example.test', market: 'IL', platform: 'TikTok', audience: 3000, engagement: 5, fit: 80, niche: 'Demo', consent: true };
+
+  test('the primary url follows the main platform, then the first link', () => {
+    const s = C.dispatch(C.createSeed(), 'creator.apply', { ...base, links: { instagram: 'https://instagram.com/x', tiktok: 'https://tiktok.com/@x', website: '' } }, { role: 'public' });
+    const c = s.creators.at(-1);
+    assert.equal(c.url, 'https://tiktok.com/@x');
+    assert.deepEqual(c.links, { instagram: 'https://instagram.com/x', tiktok: 'https://tiktok.com/@x' });
+    const s2 = C.dispatch(C.createSeed(), 'creator.apply', { ...base, platform: 'Facebook', links: { website: 'https://example.com/blog' } }, { role: 'public' });
+    assert.equal(s2.creators.at(-1).url, 'https://example.com/blog');
+    assert.equal(C.validateState(s2), true);
+  });
+
+  test('at least one https link is required; bad links and unknown keys fail', () => {
+    fails(() => C.dispatch(C.createSeed(), 'creator.apply', { ...base, links: {} }, { role: 'public' }), 'unsafeUrl');
+    fails(() => C.dispatch(C.createSeed(), 'creator.apply', { ...base, links: { tiktok: 'http://tiktok.com/@x' } }, { role: 'public' }), 'unsafeUrl');
+    const s = C.createSeed(); s.creators[0].links = { myspace: 'https://example.com' };
+    fails(() => C.validateState(s), 'invalidBackup');
+  });
+});
+
 describe('missions', () => {
   const mission = { title: 'New demo mission', market: 'US', type: 'story', objective: 'education', budget: 500, capacity: 3, deadline: C.future(10), brief: 'A brief that is long enough.', cta: 'Do the thing' };
 

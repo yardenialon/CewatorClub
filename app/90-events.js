@@ -6,7 +6,7 @@ document.addEventListener('click',event=>{
  else if(a==='menu')$('#sidebar')?.classList.toggle('open');
  else if(a==='lang'){lang=lang==='he'?'en':'he';closeModal();render();}
  else if(a==='nav'){if(remote&&remote.role==='creator')return;view='admin';page=target.dataset.page;closeModal();render();window.scrollTo(0,0);}
- else if(a==='mode'){view=remote?(remote.authenticated?(remote.role==='creator'?'creator':'admin'):'login'):target.dataset.view;closeModal();render();window.scrollTo(0,0);}
+ else if(a==='mode'){view=remote?(remote.authenticated?(remote.role==='creator'?'creator':'admin'):'login'):target.dataset.view;if(view==='apply')wizReset();closeModal();render();window.scrollTo(0,0);}
  else if(a==='logout')logout();
  else if(a==='loginAgain'){linkSentTo='';devLink='';render();}
  else if(a==='market'){market=target.dataset.market;render();}
@@ -22,7 +22,11 @@ document.addEventListener('click',event=>{
  else if(a==='verifyMetrics'){if(confirm(t('manualOnly')+'\n\n'+t('verifyMetrics')+'?'))act('creator.verify',{id,confirmed:true});}
  else if(a==='offer')offerMission(id);
  else if(a==='work')workModal(id);
- else if(a==='apply'){view='apply';closeModal();render();window.scrollTo(0,0);}
+ else if(a==='apply'){wizReset();view='apply';closeModal();render();window.scrollTo(0,0);}
+ else if(a==='wizNext')wizNext();
+ else if(a==='wizBack')wizBack();
+ else if(a==='wizChoice')wizPick(target.dataset.name,target.dataset.value);
+ else if(a==='wizDone'){wizReset();if(remote){view=remote.authenticated?'admin':'login';}else{view='admin';page='creators';market='all';}render();window.scrollTo(0,0);}
  else if(a==='buildBrief'){const f=$('#mission-form'),l=(f.elements.market?f.elements.market.value:f.dataset.market)==='US'?'en':'he';f.elements.brief.value=TRANSLATIONS[l].briefDefault;toast(t('briefGenerated'));}
  else if(a==='scroll-work')$('#my-work')?.scrollIntoView({behavior:'smooth',block:'start'});
  else if(a==='cancelWork'){if(confirm(t('cancelConfirm'))){const reason=prompt(t('cancelReason'),'Demo cancellation');if(reason)act('assignment.cancel',{id,reason});}}
@@ -53,16 +57,13 @@ document.addEventListener('submit',event=>{
  else if(f.id==='payment-form')act('assignment.record',{id,reference:p.reference,salesTotal:p.salesTotal,confirmed:f.elements.confirmed.checked});
  else if(f.id==='affiliate-form')act('settings.affiliate',{pool:p.pool,creatorShare:p.creatorShare});
  else if(f.id==='rates-form'){const rates={};['IL','US'].forEach(m=>{rates[m]={production:{},distribution:[0,1,2,3,4].map(i=>p[m+'-d-'+i])};['reel','story','blog'].forEach(k=>rates[m].production[k]=p[m+'-p-'+k]);});act('settings.rates',{rates});}
- else if(f.id==='apply-form'){
-  const payload={...p,consent:f.elements.consent.checked},showError=msg=>{$('#application-errors').textContent=msg;$('#application-errors').classList.remove('hide');};
-  if(remote){remoteAct('creator.apply',payload,{onSuccess:()=>{view=remote.authenticated?'admin':'login';page='creators';render();toast(t('applicationSaved'));},onError:showError});}
-  else{try{const next=C.dispatch(state,'creator.apply',payload,{role:'public'});persist(next);view='admin';page='creators';market='all';render();toast(t('applicationSaved'));}catch(err){showError(t(err.message));}}
- }
+ else if(f.id==='wiz-form')submitApplication();
  else if(f.id==='login-form'){
   requestLink(p.email).then(j=>{linkSentTo=p.email;devLink=j.devLink||'';render();}).catch(err=>{const el=$('#login-errors');el.textContent=t(err.message)||err.message;el.classList.remove('hide');});
  }
 });
 document.addEventListener('keydown',event=>{
+ if(event.key==='Enter'&&view==='apply'&&!applyDone&&event.target.matches('.wizard input:not([type=checkbox])')){event.preventDefault();wizNext();return;}
  const modal=$('#modal-root .modal');if(!modal)return;if(event.key==='Escape'){closeModal();return;}
  if(event.key==='Tab'){const els=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]')].filter(x=>x.offsetParent!==null),first=els[0],last=els.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}
 });

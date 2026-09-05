@@ -12,13 +12,13 @@ deliberately **not** built yet. The Hebrew user guide lives in `GUIDE_HE.md`.
 |------|-------------------------------|--------|
 | Programme admin | "מנהל התוכנית" view toggle | Approve or reject applicants, verify audience metrics, create, edit and archive missions, make offers, review content, verify publication, record payments, edit rate cards, export/import backups |
 | Creator | "פורטל יוצרים" view toggle + profile picker | Accept/decline offers, submit content links, resubmit after feedback, report publication |
-| Public applicant | Application form | Submit an application (stored as *pending*) |
+| Public applicant | Application wizard (`?view=apply`) | Submit an application through a one-question-per-screen flow (stored as *pending*). Engagement and brand fit are collected as choices and mapped to numbers (engagement 0.5 / 2 / 4 / 6, "not sure" = 2; fit 95 / 80 / 60 / 40); the admin verifies metrics manually. |
 
 In the offline prototype (index.html opened as a file) role switching is a demo affordance with no authentication. In connected mode (v0.3, `server/`) roles come from a signed-in session: see section 6b.
 
 ## 2. Core entities
 
-- **Creator** — market, platform (Instagram / TikTok / YouTube / Blog / Newsletter), audience size, engagement %, brand fit %, niche, portfolio URL, deal preference (`fee` / `affiliate` / `either`), status (`pending` → `active` / `rejected`, rejection carries a reason), `metricsVerified` flag.
+- **Creator** — market, platform (Instagram / TikTok / YouTube / Facebook / Blog / Newsletter), audience size, engagement %, brand fit %, niche, primary URL plus optional `links` (instagram, tiktok, youtube, facebook, website; all https), deal preference (`fee` / `affiliate` / `either`), status (`pending` → `active` / `rejected`, rejection carries a reason), `metricsVerified` flag.
 - **Mission** — market, format (`reel` / `story` / `blog`), objective (`dtc` / `retail` / `education`), budget, capacity (number of creators), deadline, brief, CTA, optional `archived` flag.
 - **Assignment** — the contract between one creator and one mission. Has a `deal` type: `fee` (cash) or `affiliate` (products + commission, see 4b). Carries locked fees (`production`, `distribution`, `rights`, `total`, `currency`), the status below, content and publication URLs, review checks and history, and a manual payment record.
 - **Rates** — per-market rate card (production fee per format, five distribution tiers by audience size). Versioned; changing rates only affects *new* quotes.

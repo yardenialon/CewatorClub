@@ -8,7 +8,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 | Suite | Command | Result |
 |-------|---------|--------|
 | Bundle freshness | `python build.py --check` | pass |
-| Business rules | `node test_core.js` | 52 / 52 pass |
+| Business rules | `node test_core.js` | 54 / 54 pass |
 | Formatting helpers | `node test_format.js` | 15 / 15 pass |
 | Server API | `node test_server.js` | 17 / 17 pass |
 | Browser flow, offline prototype | `python test_ui.py` | 17 / 17 pass |
@@ -24,6 +24,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 - Offers: budget reservation; blocked for pending, unverified, cross-market or duplicate creators; blocked over budget, over capacity, or at zero fee; admin only; fees frozen against later rate-card changes.
 - Full state machine offered → accepted → submitted → changes → submitted → approved → published → payable → paid, including every guard on the way (consent, https, four checks, feedback required, confirmations, reference length) and role checks (creator cannot act on another creator's work).
 - Decline releases slot and budget; admin cancel needs a reason and is impossible after publication; unknown commands / ids are rejected.
+- Application links: primary URL follows the main platform then the first link; at least one https link; unknown keys rejected by backup validation.
 - Creator rejection: reason required, admin only, pending only; a rejected creator cannot be approved or offered.
 - Mission editing: title/objective/budget/capacity/deadline/brief/CTA; budget and capacity floors; format locked once assigned; past deadline rules; admin only; seeded title keys replaced.
 - Mission archive / restore: blocked while work is open; archived missions refuse offers and edits; restore reopens; financial stats unchanged; backup validation rejects an archived mission with open work.
@@ -40,7 +41,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 6. Creator reports publication; admin verifies; admin records payment `DEMO-001`.
 7. State survives a page reload.
 8. New mission form creates a mission.
-9. Public application form stores a pending creator.
+9. Application wizard: empty name and missing links show inline errors; Enter advances; choices auto-advance; summary shows the entered name; consent is enforced; the stored creator has the right platform, primary URL derived from it, extra links, numeric metrics and deal preference; the done screen leads back to the creators table.
 10. Reset restores the seed.
 11. Mobile viewport (390 px) shows the menu toggle and opens the sidebar.
 12. Admin rejects a pending applicant through the confirm + reason prompts.
@@ -68,7 +69,7 @@ HTML escaping, initials, currency/number/date formatting per locale, CSV quoting
 3. Admin signs in through the dev link, creates a mission, it lands in `data/state.json`, and survives a reload with localStorage cleared.
 4. Creator signs in, sees only her own portal and work, accepts her offer, and the server records it.
 5. Sign out returns to the sign-in screen.
-6. Public application form works without a session.
+6. Public application wizard works without a session; "not sure" engagement maps to 2; the done screen returns to sign-in.
 7. No JavaScript or console errors.
 
 ## Not yet verified

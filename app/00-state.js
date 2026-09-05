@@ -10,6 +10,7 @@ let lang=prefs.lang==='en'?'en':'he', view='admin', page='dashboard', market='al
 const query=new URLSearchParams(location.search);if(query.get('lang')==='en')lang='en';if(query.get('view')==='creator')view='creator';if(query.get('view')==='apply')view='apply';
 let showArchived=false;
 let remote=null, loginError='', linkSentTo='', devLink='';
+let applyStep=0, applyData={}, applyError='', applyDone=false;
 let state;
 try {const raw=localStorage.getItem(KEY);state=raw?JSON.parse(raw):C.createSeed();C.validateState(state);}catch(err){state=C.createSeed();loadError='invalidBackup';}
 function t(k){return TRANSLATIONS[lang][k]||k;}
