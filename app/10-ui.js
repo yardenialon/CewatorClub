@@ -37,6 +37,18 @@ function publicHeader(opts={}){ // shared by the landing page and the sign-in sc
  const dark=!!opts.dark;
  return '<header class="pub-header'+(dark?' dark':'')+'"><a class="pub-brand" href="#top" data-action="mode" data-view="landing">'+brandLogo(dark?'light':'dark')+'<span class="brand-sub">CREATOR CLUB</span></a><nav class="pub-nav" aria-label="SimpliiGood">'+(opts.hideLogin?'':'<button type="button" class="pub-link" data-action="mode" data-view="login">'+e(t('ldNavLogin'))+'</button>')+'<button type="button" class="btn sun pub-cta" data-action="apply">'+e(t('ldNavJoin'))+icon('arrow')+'</button><button type="button" class="lang-btn" data-action="lang" aria-label="Change language">'+(lang==='he'?'EN':'HE')+'</button></nav></header>';
 }
+/* Interest taxonomy chips. ids -> pills; `limit` keeps tables short ("+n"). */
+function interestChips(ids,limit=0,cls='pill outline'){
+ const list=(ids||[]).filter(id=>C.INTERESTS.some(i=>i.id===id));
+ if(!list.length)return '';
+ const shown=limit?list.slice(0,limit):list;
+ return '<span class="pill-row chips">'+shown.map(id=>'<span class="'+cls+'">'+e(t('int_'+id))+'</span>').join('')+(limit&&list.length>limit?'<span class="'+cls+'">+'+(list.length-limit)+'</span>':'')+'</span>';
+}
+/* Checkbox chips grouped by cluster, for the collaboration form. */
+function interestPicker(selected,name='interests'){
+ const sel=new Set(selected||[]);
+ return '<div class="field full"><span class="field-label">'+e(t('interests'))+'</span><div class="interest-groups">'+C.INTEREST_CLUSTERS.map(cl=>'<div class="interest-group"><span class="tiny muted">'+e(t('cluster_'+cl))+'</span><div class="chip-grid">'+C.INTERESTS.filter(i=>i.cluster===cl).map(i=>'<label class="chip-check"><input type="checkbox" name="'+e(name)+'" value="'+e(i.id)+'" '+(sel.has(i.id)?'checked':'')+'><span>'+e(t('int_'+i.id))+'</span></label>').join('')+'</div></div>').join('')+'</div><div class="hint">'+e(t('interestsHint'))+'</div></div>';
+}
 function amountLabel(a){return a.deal==='affiliate'?'<span class="affiliate-label"><strong>'+e(a.affiliate.creatorShare)+'%</strong> <span class="tiny muted">'+e(t('dealAffiliate'))+' / <bdi>'+e(a.affiliate.promoCode)+'</bdi></span></span>':fm(a.fees.total,a.fees.currency);}
 const prefKey=c=>({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[c.dealPreference||'fee']);
 function btn(label,action,data='',cls=''){return '<button type="button" class="btn '+cls+'" data-action="'+action+'" '+data+'>'+e(t(label))+'</button>';}

@@ -19,6 +19,31 @@
   function https(v) { try { const u=new URL(v); if(u.protocol!=='https:'||!u.hostname||u.username||u.password) fail('unsafeUrl'); return u.href; } catch(e){ fail('unsafeUrl'); } }
   const CODE=/^[A-Z0-9]{4,20}$/;
   const LINK_KEYS=['instagram','tiktok','youtube','facebook','website'];
+  /* Audience interest taxonomy: what a creator's content is about and who a collaboration is for.
+     Labels live in i18n.json as int_<id> / cluster_<id>. Order here is the display order. */
+  const INTEREST_CLUSTERS=['health','nutrition','fitness','food','plant','performance','family','creators'];
+  const INTERESTS=[
+    ['healthy-lifestyle','health'],['wellness','health'],['morning-routine','health'],['habit-change','health'],['active-lifestyle','health'],
+    ['healthy-nutrition','nutrition'],['balanced-nutrition','nutrition'],['dietitians','nutrition'],['clean-eating','nutrition'],['nutrition-reset','nutrition'],
+    ['fitness','fitness'],['gym','fitness'],['running','fitness'],['yoga-pilates','fitness'],['sports-nutrition','fitness'],['recovery','fitness'],
+    ['smoothies','food'],['smoothie-recipes','food'],['smoothie-bowls','food'],['healthy-recipes','food'],['healthy-breakfast','food'],['healthy-cooking','food'],
+    ['superfood','plant'],['natural-food','plant'],['plant-based','plant'],['vegan-vegetarian','plant'],
+    ['biohacking','performance'],['longevity','performance'],['performance-energy','performance'],
+    ['healthy-parents','family'],['family-nutrition','family'],
+    ['lifestyle-health','creators'],['foodies','creators'],['recipe-creators','creators'],['ugc-food-health','creators']
+  ].map(([id,cluster])=>({id,cluster}));
+  const INTEREST_IDS=new Set(INTERESTS.map(i=>i.id));
+  const MAX_INTERESTS=8;
+  /* Accepts an array (or a comma-separated string); returns a de-duplicated array of known ids. */
+  function cleanInterests(raw){
+    if(raw===undefined||raw===null||raw==='')return [];
+    const list=Array.isArray(raw)?raw:String(raw).split(',');
+    const out=[]; for(const v of list){ const id=String(v).trim(); if(!id)continue; if(!INTEREST_IDS.has(id))fail('invalidInterests'); if(!out.includes(id))out.push(id); }
+    if(out.length>MAX_INTERESTS)fail('invalidInterests');
+    return out;
+  }
+  /* Interests a creator and a mission share, in taxonomy order. */
+  function interestMatch(creator,mission){ const a=new Set(creator?.interests||[]); return (mission?.interests||[]).filter(id=>a.has(id)); }
   function cleanLinks(raw){ const out={}; if(raw&&typeof raw==='object'&&!Array.isArray(raw)) for(const k of LINK_KEYS){ const v=raw[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='') out[k]=https(String(v).trim()); } return out; }
   function affiliateConfig(s){ const a=s.affiliate||{}; return {pool:Number.isFinite(a.pool)?a.pool:20, creatorShare:Number.isFinite(a.creatorShare)?a.creatorShare:10}; }
   function promoCodeFor(s, creator, share){
@@ -58,19 +83,19 @@
     const s={version:VERSION,revision:0,updatedAt:now,ratesVersion:1,affiliate:{pool:20,creatorShare:10},
       rates:{IL:{production:{reel:300,story:100,blog:400},distribution:[60,160,320,600,900]},US:{production:{reel:90,story:35,blog:110},distribution:[20,50,100,200,300]}},
       creators:[
-        {id:'c1',name:'Noa Green / Demo',email:'noa@example.test',market:'IL',platform:'Instagram',audience:18400,engagement:4.8,fit:88,niche:'Smoothies & everyday food',url:'https://example.com/demo/noa',status:'active',metricsVerified:true,dealPreference:'fee',createdAt:now},
-        {id:'c2',name:'Daniel Cooks / Demo',email:'daniel@example.test',market:'IL',platform:'Blog',audience:12000,engagement:3.2,fit:91,niche:'Recipes & simple cooking',url:'https://example.com/demo/daniel',status:'active',metricsVerified:true,dealPreference:'fee',createdAt:now},
-        {id:'c3',name:'Maya Moves / Demo',email:'maya@example.test',market:'US',platform:'TikTok',audience:32600,engagement:5.2,fit:78,niche:'Food & active routines',url:'https://example.com/demo/maya',status:'active',metricsVerified:true,createdAt:now},
-        {id:'c4',name:'Alex Eats / Demo',email:'alex@example.test',market:'US',platform:'Instagram',audience:24100,engagement:3.9,fit:84,niche:'Freezer finds & recipes',url:'https://example.com/demo/alex',status:'active',metricsVerified:true,createdAt:now},
-        {id:'c5',name:'Lia Fresh / Demo',email:'lia@example.test',market:'IL',platform:'Instagram',audience:8700,engagement:6.1,fit:90,niche:'Family recipes',url:'https://example.com/demo/lia',status:'pending',metricsVerified:false,dealPreference:'either',createdAt:now},
-        {id:'c6',name:'Sam Blends / Demo',email:'sam@example.test',market:'US',platform:'Newsletter',audience:6400,engagement:2.7,fit:72,niche:'Food newsletter',url:'https://example.com/demo/sam',status:'pending',metricsVerified:false,dealPreference:'affiliate',createdAt:now},
-        {id:'c7',name:'Tal Bites / Demo',email:'tal@example.test',market:'IL',platform:'Instagram',audience:4200,engagement:7.4,fit:85,niche:'Snack ideas & lunchboxes',url:'https://example.com/demo/tal',status:'active',metricsVerified:true,dealPreference:'affiliate',createdAt:now}
+        {id:'c1',name:'Noa Green / Demo',email:'noa@example.test',market:'IL',platform:'Instagram',audience:18400,engagement:4.8,fit:88,niche:'Smoothies & everyday food',url:'https://example.com/demo/noa',status:'active',metricsVerified:true,dealPreference:'fee',interests:['smoothies','smoothie-recipes','healthy-breakfast','healthy-lifestyle'],createdAt:now},
+        {id:'c2',name:'Daniel Cooks / Demo',email:'daniel@example.test',market:'IL',platform:'Blog',audience:12000,engagement:3.2,fit:91,niche:'Recipes & simple cooking',url:'https://example.com/demo/daniel',status:'active',metricsVerified:true,dealPreference:'fee',interests:['healthy-recipes','healthy-cooking','foodies','recipe-creators'],createdAt:now},
+        {id:'c3',name:'Maya Moves / Demo',email:'maya@example.test',market:'US',platform:'TikTok',audience:32600,engagement:5.2,fit:78,niche:'Food & active routines',url:'https://example.com/demo/maya',status:'active',metricsVerified:true,interests:['fitness','active-lifestyle','sports-nutrition','smoothies'],createdAt:now},
+        {id:'c4',name:'Alex Eats / Demo',email:'alex@example.test',market:'US',platform:'Instagram',audience:24100,engagement:3.9,fit:84,niche:'Freezer finds & recipes',url:'https://example.com/demo/alex',status:'active',metricsVerified:true,interests:['healthy-recipes','plant-based','foodies'],createdAt:now},
+        {id:'c5',name:'Lia Fresh / Demo',email:'lia@example.test',market:'IL',platform:'Instagram',audience:8700,engagement:6.1,fit:90,niche:'Family recipes',url:'https://example.com/demo/lia',status:'pending',metricsVerified:false,dealPreference:'either',interests:['family-nutrition','healthy-parents','healthy-breakfast'],createdAt:now},
+        {id:'c6',name:'Sam Blends / Demo',email:'sam@example.test',market:'US',platform:'Newsletter',audience:6400,engagement:2.7,fit:72,niche:'Food newsletter',url:'https://example.com/demo/sam',status:'pending',metricsVerified:false,dealPreference:'affiliate',interests:['clean-eating','natural-food','superfood'],createdAt:now},
+        {id:'c7',name:'Tal Bites / Demo',email:'tal@example.test',market:'IL',platform:'Instagram',audience:4200,engagement:7.4,fit:85,niche:'Snack ideas & lunchboxes',url:'https://example.com/demo/tal',status:'active',metricsVerified:true,dealPreference:'affiliate',interests:['family-nutrition','healthy-recipes','ugc-food-health'],createdAt:now}
       ],
       missions:[
-        {id:'m1',titleKey:'seedMission1',market:'IL',type:'reel',objective:'dtc',budget:3500,capacity:6,deadline:future(21),briefKey:'briefDefault',cta:'Visit the approved product page',createdAt:now},
-        {id:'m2',titleKey:'seedMission2',market:'US',type:'reel',objective:'education',budget:1500,capacity:5,deadline:future(28),briefKey:'briefDefault',cta:'Discover how to use the cubes',createdAt:now},
-        {id:'m3',titleKey:'seedMission3',market:'IL',type:'blog',objective:'dtc',budget:2200,capacity:4,deadline:future(25),briefKey:'briefDefault',cta:'Explore the approved recipe',createdAt:now},
-        {id:'m4',titleKey:'seedMission4',market:'US',type:'reel',objective:'retail',budget:1200,capacity:4,deadline:future(30),briefKey:'briefDefault',cta:'Use an approved store locator; confirm stock separately',createdAt:now}
+        {id:'m1',titleKey:'seedMission1',market:'IL',type:'reel',objective:'dtc',budget:3500,capacity:6,deadline:future(21),briefKey:'briefDefault',cta:'Visit the approved product page',interests:['smoothies','healthy-breakfast','morning-routine'],createdAt:now},
+        {id:'m2',titleKey:'seedMission2',market:'US',type:'reel',objective:'education',budget:1500,capacity:5,deadline:future(28),briefKey:'briefDefault',cta:'Discover how to use the cubes',interests:['fitness','sports-nutrition','recovery'],createdAt:now},
+        {id:'m3',titleKey:'seedMission3',market:'IL',type:'blog',objective:'dtc',budget:2200,capacity:4,deadline:future(25),briefKey:'briefDefault',cta:'Explore the approved recipe',interests:['healthy-recipes','healthy-cooking','recipe-creators'],createdAt:now},
+        {id:'m4',titleKey:'seedMission4',market:'US',type:'reel',objective:'retail',budget:1200,capacity:4,deadline:future(30),briefKey:'briefDefault',cta:'Use an approved store locator; confirm stock separately',interests:['plant-based','natural-food','foodies'],createdAt:now}
       ],assignments:[],activity:[]};
     function seedAssignment(id,cid,mid,status,manualDist) {
       const q=quote(s,cid,mid); if(manualDist!==undefined){q.distribution=manualDist;q.total=q.production+manualDist;}
@@ -105,6 +130,7 @@
       if(c.rejectReason!==undefined)text(c.rejectReason,500);
       if(c.dealPreference!==undefined&&!['fee','affiliate','either'].includes(c.dealPreference))fail('invalidBackup');
       if(c.links!==undefined){if(!c.links||typeof c.links!=='object'||Array.isArray(c.links))fail('invalidBackup');for(const [k,v] of Object.entries(c.links)){if(!LINK_KEYS.includes(k))fail('invalidBackup');https(v);}}
+      if(c.interests!==undefined){if(!Array.isArray(c.interests))fail('invalidBackup');try{cleanInterests(c.interests);}catch(_){fail('invalidBackup');}}
       ids.add(c.id);cids.set(c.id,c);
     }
     for(const m of s.missions){
@@ -113,6 +139,7 @@
       if(!m.titleKey)text(m.title,150,3); if(m.briefKey&&m.briefKey!=='briefDefault')fail('invalidBackup'); if(!m.briefKey)text(m.brief,5000,10);
       text(m.cta,300);num(m.budget,0);num(m.capacity,1,500);if(!Number.isInteger(m.capacity)||!/^\d{4}-\d{2}-\d{2}$/.test(m.deadline))fail('invalidBackup');
       if(m.archived!==undefined&&m.archived!==true)fail('invalidBackup');
+      if(m.interests!==undefined){if(!Array.isArray(m.interests))fail('invalidBackup');try{cleanInterests(m.interests);}catch(_){fail('invalidBackup');}}
       ids.add(m.id);mids.set(m.id,m);
     }
     const pairs=new Set();
@@ -159,7 +186,7 @@
       const dealPreference=p.dealPreference||'either';if(!['fee','affiliate','either'].includes(dealPreference))fail('required');
       const links=cleanLinks(p.links);const primary={Instagram:'instagram',TikTok:'tiktok',YouTube:'youtube',Facebook:'facebook'}[p.platform]||'website';
       const url=p.url?https(p.url):(links[primary]||Object.values(links)[0]);if(!url)fail('unsafeUrl');
-      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url,...(Object.keys(links).length?{links}:{}),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
+      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url,...(Object.keys(links).length?{links}:{}),interests:cleanInterests(p.interests),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
       if(!Number.isInteger(c.audience))fail('required');s.creators.push(c);subject=c.name;
     } else if(command==='creator.approve'||command==='creator.verify'||command==='creator.reject'){
       admin();const c=s.creators.find(x=>x.id===p.id);if(!c)fail('required');
@@ -170,7 +197,7 @@
     } else if(command==='mission.create'){
       admin(); if(!['IL','US'].includes(p.market)||!['reel','story','blog'].includes(p.type)||!['dtc','retail','education'].includes(p.objective))fail('required');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||p.deadline<today())fail('dateInvalid');
-      const m={id:uid('m'),title:text(p.title,150,3),market:p.market,type:p.type,objective:p.objective,budget:money(num(p.budget,0)),capacity:num(p.capacity,1,500),deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),createdAt:now};
+      const m={id:uid('m'),title:text(p.title,150,3),market:p.market,type:p.type,objective:p.objective,budget:money(num(p.budget,0)),capacity:num(p.capacity,1,500),deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),interests:cleanInterests(p.interests),createdAt:now};
       if(!Number.isInteger(m.capacity))fail('budgetPositive');s.missions.push(m);subject=m.title;
     } else if(command==='mission.update'){
       admin();const m=s.missions.find(x=>x.id===p.id);if(!m)fail('required');if(m.archived)fail('missionArchived');
@@ -180,7 +207,7 @@
       if(!/^\d{4}-\d{2}-\d{2}$/.test(p.deadline)||(p.deadline!==m.deadline&&p.deadline<today()))fail('dateInvalid');
       const budget=money(num(p.budget,0)),capacity=num(p.capacity,1,500);if(!Number.isInteger(capacity))fail('budgetPositive');
       if(budget<allocation(s,m.id)-0.001)fail('budgetBelowAllocated');if(capacity<live)fail('capacityBelowAssigned');
-      Object.assign(m,{title:text(p.title,150,3),type:p.type,objective:p.objective,budget,capacity,deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),updatedAt:now});
+      Object.assign(m,{title:text(p.title,150,3),type:p.type,objective:p.objective,budget,capacity,deadline:p.deadline,brief:text(p.brief,5000,10),cta:text(p.cta,300,2),interests:cleanInterests(p.interests),updatedAt:now});
       delete m.titleKey;delete m.briefKey;subject=m.title;
     } else if(command==='mission.archive'||command==='mission.restore'){
       admin();const m=s.missions.find(x=>x.id===p.id);if(!m)fail('required');
@@ -236,5 +263,5 @@
     }else fail('statusInvalid');
     s.revision++;s.updatedAt=now;s.activity.unshift({id:uid('log'),at:now,action:command,actor:actor.role,subject});s.activity=s.activity.slice(0,5000);validateState(s);return s;
   }
-  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor,LINK_KEYS};
+  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor,LINK_KEYS,INTERESTS,INTEREST_CLUSTERS,MAX_INTERESTS,cleanInterests,interestMatch};
 });

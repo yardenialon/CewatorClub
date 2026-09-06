@@ -583,3 +583,50 @@ describe('helpers', () => {
     assert.equal(C.currency('US'), 'USD');
   });
 });
+
+describe('interests (audience taxonomy)', () => {
+  const applicant = extra => ({ name: 'Interest Tester', email: 'interest@example.test', market: 'IL', platform: 'Instagram', audience: 900, engagement: 3, fit: 70, niche: 'test content', links: { instagram: 'https://instagram.com/x' }, consent: true, ...extra });
+
+  test('taxonomy has 35 interests in 8 clusters, every cluster non-empty', () => {
+    assert.equal(C.INTERESTS.length, 35);
+    assert.equal(C.INTEREST_CLUSTERS.length, 8);
+    for (const cl of C.INTEREST_CLUSTERS) assert.ok(C.INTERESTS.some(i => i.cluster === cl), cl);
+    assert.equal(new Set(C.INTERESTS.map(i => i.id)).size, 35);
+  });
+
+  test('cleanInterests de-duplicates, accepts comma strings, rejects unknown ids and more than 8', () => {
+    assert.deepEqual(C.cleanInterests(['running', 'running', 'smoothies']), ['running', 'smoothies']);
+    assert.deepEqual(C.cleanInterests('gym, yoga-pilates'), ['gym', 'yoga-pilates']);
+    assert.deepEqual(C.cleanInterests(undefined), []);
+    fails(() => C.cleanInterests(['not-a-thing']), 'invalidInterests');
+    fails(() => C.cleanInterests(C.INTERESTS.slice(0, 9).map(i => i.id)), 'invalidInterests');
+  });
+
+  test('creator.apply stores interests; invalid ones are refused', () => {
+    const s = C.dispatch(C.createSeed(), 'creator.apply', applicant({ interests: ['smoothies', 'healthy-breakfast'] }), { role: 'public' });
+    assert.deepEqual(s.creators.at(-1).interests, ['smoothies', 'healthy-breakfast']);
+    fails(() => C.dispatch(C.createSeed(), 'creator.apply', applicant({ interests: ['x'] }), { role: 'public' }), 'invalidInterests');
+    const none = C.dispatch(C.createSeed(), 'creator.apply', applicant({}), { role: 'public' });
+    assert.deepEqual(none.creators.at(-1).interests, []);
+  });
+
+  test('missions carry interests and interestMatch finds the overlap in taxonomy order', () => {
+    const s = C.dispatch(C.createSeed(), 'mission.create', { title: 'Morning smoothies', market: 'IL', type: 'reel', objective: 'education', budget: 500, capacity: 2, deadline: C.future(10), brief: 'Ten characters at least', cta: 'Go', interests: ['healthy-breakfast', 'smoothies'] }, ADMIN);
+    const m = s.missions.at(-1);
+    assert.deepEqual(m.interests, ['healthy-breakfast', 'smoothies']);
+    assert.deepEqual(C.interestMatch(s.creators[0], m), ['healthy-breakfast', 'smoothies']); // c1: smoothies + breakfast
+    assert.deepEqual(C.interestMatch(s.creators[2], m), ['smoothies']);
+    assert.deepEqual(C.interestMatch({ interests: [] }, m), []);
+    const upd = C.dispatch(s, 'mission.update', { ...m, id: m.id, interests: ['running'] }, ADMIN);
+    assert.deepEqual(upd.missions.at(-1).interests, ['running']);
+  });
+
+  test('validateState refuses malformed interests', () => {
+    const s = C.createSeed();
+    s.creators[0].interests = 'smoothies';
+    fails(() => C.validateState(s), 'invalidBackup');
+    const s2 = C.createSeed();
+    s2.missions[0].interests = ['nope'];
+    fails(() => C.validateState(s2), 'invalidBackup');
+  });
+});

@@ -26,6 +26,7 @@ document.addEventListener('click',event=>{
  else if(a==='wizNext')wizNext();
  else if(a==='wizBack')wizBack();
  else if(a==='wizChoice')wizPick(target.dataset.name,target.dataset.value);
+ else if(a==='wizToggle')wizToggle(target.dataset.value);
  else if(a==='wizDone'){wizReset();if(remote){view=remote.authenticated?'admin':'landing';}else{view='admin';page='creators';market='all';}render();window.scrollTo(0,0);}
  else if(a==='faq'){target.closest('.faq-item')?.classList.toggle('open');target.setAttribute('aria-expanded',String(target.closest('.faq-item')?.classList.contains('open')));}
  else if(a==='scrollTo'){document.getElementById(target.dataset.target)?.scrollIntoView({behavior:'smooth',block:'start'});}
@@ -49,7 +50,7 @@ document.addEventListener('change',async event=>{
 });
 document.addEventListener('submit',event=>{
  const f=event.target;if(!(f instanceof HTMLFormElement))return;event.preventDefault();const p=data(f),id=f.dataset.id;
- if(f.id==='mission-form')act(id?'mission.update':'mission.create',id?{...p,id}:p);
+ if(f.id==='mission-form'){const interests=[...f.querySelectorAll('input[name="interests"]:checked')].map(x=>x.value);act(id?'mission.update':'mission.create',{...p,interests,...(id?{id}:{})});}
  else if(f.id==='offer-form')act('assignment.offer',{...p,missionId:f.dataset.mission});
  else if(f.id==='accept-form')act('assignment.accept',{id,confirmed:f.elements.confirmed.checked});
  else if(f.id==='content-form')act('assignment.submit',{id,...p});

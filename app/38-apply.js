@@ -1,6 +1,7 @@
 /* Creator application: a conversational, one-question-per-screen flow.
    Collects the same fields creator.apply needs, plus up to five social links. */
-const WIZ_STEPS=['intro','name','email','market','links','platform','audience','engagement','niche','fit','deal','consent'];
+const WIZ_STEPS=['intro','name','email','market','links','platform','audience','engagement','niche','interests','fit','deal','consent'];
+const WIZ_MAX_INTERESTS=6;
 const WIZ_QUESTIONS=WIZ_STEPS.length-2; // intro and consent are not counted as questions
 const LINK_META=[['instagram','instagram','linkInstagram','https://instagram.com/…'],['tiktok','tiktok','linkTiktok','https://tiktok.com/@…'],['youtube','youtube','linkYoutube','https://youtube.com/@…'],['facebook','facebook','linkFacebook','https://facebook.com/…'],['website','globe','linkWebsite','https://…']];
 const wizChoice=(name,value,label,desc='')=>'<button type="button" class="wiz-choice '+(String(applyData[name])===String(value)?'active':'')+'" data-action="wizChoice" data-name="'+e(name)+'" data-value="'+e(value)+'">'+e(label)+(desc?'<small>'+e(desc)+'</small>':'')+'</button>';
@@ -18,6 +19,7 @@ function wizValidate(step){
   case 'audience': { const n=Number(String(d.audience||'').replace(/[,\s]/g,'')); return Number.isInteger(n)&&n>=0&&String(d.audience||'').trim()!==''?'':'wizErrAudience'; }
   case 'engagement': return d.engagement!==undefined&&d.engagement!==''?'':'wizErrChoice';
   case 'niche': return String(d.niche||'').trim().length>=3?'':'wizErrNiche';
+  case 'interests': return (d.interests||[]).length?'':'wizErrInterests';
   case 'fit': return d.fit!==undefined&&d.fit!==''?'':'wizErrChoice';
   case 'deal': return d.dealPreference?'':'wizErrChoice';
   case 'consent': return d.consent?'':'wizErrConsent';
@@ -39,12 +41,13 @@ function wizBody(step){
   case 'audience': return '<h1>'+e(t('wizAudienceQ'))+'</h1><p class="sub">'+e(t('wizAudienceSub'))+'</p>'+wizInput('audience','text','12,000','inputmode="numeric" maxlength="12" dir="ltr"')+nav();
   case 'engagement': return '<h1>'+e(t('wizEngagementQ'))+'</h1><p class="sub">'+e(t('wizEngagementSub'))+'</p><div class="wiz-choices">'+wizChoice('engagement',0.5,t('wizEng1'))+wizChoice('engagement',2,t('wizEng2'))+wizChoice('engagement',4,t('wizEng3'))+wizChoice('engagement',6,t('wizEng4'))+wizChoice('engagement','unknown',t('wizEng0'))+'</div>'+choicesNav;
   case 'niche': return '<h1>'+e(t('wizNicheQ'))+'</h1><p class="sub">'+e(t('wizNicheSub'))+'</p>'+wizInput('niche','text',t('wizNichePh'),'maxlength="300"')+nav();
+  case 'interests': { const sel=d.interests||[]; return '<h1>'+e(t('wizInterestsQ'))+'</h1><p class="sub">'+e(t('wizInterestsSub').replace('{max}',WIZ_MAX_INTERESTS))+'</p><div class="wiz-groups">'+C.INTEREST_CLUSTERS.map(cl=>'<div class="wiz-group"><span class="wiz-group-name">'+e(t('cluster_'+cl))+'</span><div class="wiz-chips">'+C.INTERESTS.filter(i=>i.cluster===cl).map(i=>'<button type="button" class="wiz-chip '+(sel.includes(i.id)?'active':'')+'" data-action="wizToggle" data-value="'+e(i.id)+'" aria-pressed="'+sel.includes(i.id)+'">'+e(t('int_'+i.id))+'</button>').join('')+'</div></div>').join('')+'</div><p class="wiz-hint" id="wiz-count">'+e(t('wizInterestsCount').replace('{n}',sel.length).replace('{max}',WIZ_MAX_INTERESTS))+'</p>'+nav(false); }
   case 'fit': return '<h1>'+e(t('wizFitQ'))+'</h1><p class="sub">'+e(t('wizFitSub'))+'</p><div class="wiz-choices">'+wizChoice('fit',95,t('wizFit1'))+wizChoice('fit',80,t('wizFit2'))+wizChoice('fit',60,t('wizFit3'))+wizChoice('fit',40,t('wizFit4'))+'</div>'+choicesNav;
   case 'deal': return '<h1>'+e(t('wizDealQ'))+'</h1><p class="sub">'+e(t('wizDealSub'))+'</p><div class="wiz-choices">'+wizChoice('dealPreference','fee',t('dealFee'),t('wizDealFeeD'))+wizChoice('dealPreference','affiliate',t('dealAffiliate'),t('wizDealAffD'))+wizChoice('dealPreference','either',t('dealEither'),t('wizDealEitherD'))+'</div>'+choicesNav;
   case 'consent': {
    const filledLinks=LINK_META.filter(([k])=>links[k]).map(([k,,label])=>t(label)).join(', ');
    const row=(k,v)=>'<div><span>'+e(t(k))+'</span><span><bdi>'+e(v)+'</bdi></span></div>';
-   return '<h1>'+e(t('wizConsentQ'))+'</h1><p class="sub">'+e(t('wizConsentSub'))+'</p><form id="wiz-form"><div class="wiz-summary">'+row('wizSummaryName',d.name)+row('email',d.email)+row('market',t(d.market==='IL'?'israel':'usa'))+row('platform',d.platform)+row('followers',String(d.audience))+row('wizSummaryLinks',filledLinks)+row('niche',d.niche)+row('dealPreference',t({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[d.dealPreference]))+'</div><label class="check"><input type="checkbox" name="consent" data-wiz="consent" '+(d.consent?'checked':'')+'> <span>'+e(t('consent'))+'</span></label><div class="wiz-nav"><button type="submit" class="btn sun">'+e(t('wizSend'))+icon('arrow')+'</button><button type="button" class="btn ghost" data-action="wizBack">'+e(t('wizBack'))+'</button></div></form>';
+   return '<h1>'+e(t('wizConsentQ'))+'</h1><p class="sub">'+e(t('wizConsentSub'))+'</p><form id="wiz-form"><div class="wiz-summary">'+row('wizSummaryName',d.name)+row('email',d.email)+row('market',t(d.market==='IL'?'israel':'usa'))+row('platform',d.platform)+row('followers',String(d.audience))+row('wizSummaryLinks',filledLinks)+row('niche',d.niche)+row('wizSummaryInterests',(d.interests||[]).map(id=>t('int_'+id)).join(', '))+row('dealPreference',t({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[d.dealPreference]))+'</div><label class="check"><input type="checkbox" name="consent" data-wiz="consent" '+(d.consent?'checked':'')+'> <span>'+e(t('consent'))+'</span></label><div class="wiz-nav"><button type="submit" class="btn sun">'+e(t('wizSend'))+icon('arrow')+'</button><button type="button" class="btn ghost" data-action="wizBack">'+e(t('wizBack'))+'</button></div></form>';
   }
   default: return '';
  }
@@ -73,6 +76,13 @@ function wizNext(){
 }
 function wizBack(){wizCapture();applyError='';if(applyStep>0)applyStep--;render();}
 function wizPick(name,value){const parsed=value==='unknown'?value:(isNaN(Number(value))||value===''?value:Number(value));applyData[name]=parsed;applyError='';if(applyStep<WIZ_STEPS.length-1)applyStep++;render();window.scrollTo(0,0);}
+function wizToggle(id){ // multi-select chip: toggle in place, do not advance
+ const sel=applyData.interests||[]; const i=sel.indexOf(id);
+ if(i>=0)sel.splice(i,1); else if(sel.length<WIZ_MAX_INTERESTS)sel.push(id); else {applyError='';toast(t('wizInterestsCount').replace('{n}',sel.length).replace('{max}',WIZ_MAX_INTERESTS),true);return;}
+ applyData.interests=sel; applyError='';
+ const btn=document.querySelector('.wiz-chip[data-value="'+CSS.escape(id)+'"]'); if(btn){btn.classList.toggle('active',sel.includes(id));btn.setAttribute('aria-pressed',String(sel.includes(id)));}
+ const count=$('#wiz-count'); if(count)count.textContent=t('wizInterestsCount').replace('{n}',sel.length).replace('{max}',WIZ_MAX_INTERESTS);
+}
 function wizReset(){applyStep=0;applyData={};applyError='';applyDone=false;}
 
 function submitApplication(){
@@ -80,7 +90,7 @@ function submitApplication(){
  const err=wizValidate('consent'); if(err){applyError=err;render();return;}
  const d=applyData;
  const links={}; for(const [k] of LINK_META){const v=String((d.links||{})[k]||'').trim(); if(v)links[k]=v;}
- const payload={name:String(d.name||'').trim(),email:String(d.email||'').trim(),market:d.market,platform:d.platform,audience:Number(String(d.audience).replace(/[,\s]/g,'')),engagement:d.engagement==='unknown'?2:Number(d.engagement),fit:Number(d.fit),niche:String(d.niche||'').trim(),links,dealPreference:d.dealPreference,consent:!!d.consent};
+ const payload={name:String(d.name||'').trim(),email:String(d.email||'').trim(),market:d.market,platform:d.platform,audience:Number(String(d.audience).replace(/[,\s]/g,'')),engagement:d.engagement==='unknown'?2:Number(d.engagement),fit:Number(d.fit),niche:String(d.niche||'').trim(),links,interests:d.interests||[],dealPreference:d.dealPreference,consent:!!d.consent};
  const done=()=>{applyDone=true;applyError='';render();window.scrollTo(0,0);};
  const showError=msg=>{applyError=msg;render();};
  if(remote){remoteAct('creator.apply',payload,{onSuccess:done,onError:showError});return;}

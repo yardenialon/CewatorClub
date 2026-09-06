@@ -195,6 +195,14 @@ class DemoFlow(unittest.TestCase):
         self.wiz_pick("engagement", "4")
         page.locator('.wizard-card[data-step="niche"]').wait_for()
         self.wiz_type("UI testing recipes")
+        page.locator('.wizard-card[data-step="interests"]').wait_for()
+        page.locator('[data-action="wizNext"]').click()  # nothing picked -> error
+        page.locator(".wiz-error").wait_for()
+        page.locator('[data-action="wizToggle"][data-value="smoothies"]').click()
+        page.locator('[data-action="wizToggle"][data-value="running"]').click()
+        page.locator('[data-action="wizToggle"][data-value="running"]').click()  # toggle off again
+        self.assertIn("1", page.locator("#wiz-count").inner_text())
+        page.locator('[data-action="wizNext"]').click()
         page.locator('.wizard-card[data-step="fit"]').wait_for()
         self.wiz_pick("fit", "80")
         page.locator('.wizard-card[data-step="deal"]').wait_for()
@@ -213,6 +221,7 @@ class DemoFlow(unittest.TestCase):
         self.assertEqual(c["url"], "https://tiktok.com/@ui.demo")
         self.assertEqual(c["links"]["instagram"], "https://instagram.com/ui.demo")
         self.assertEqual((c["audience"], c["engagement"], c["fit"], c["dealPreference"]), (5000, 4, 80, "affiliate"))
+        self.assertEqual(c["interests"], ["smoothies"])
         page.locator("#wiz-done").click()
         page.locator("#creator-table").wait_for()
 

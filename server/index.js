@@ -22,6 +22,7 @@ const auth = require('./auth.js');
 const ROOT = path.join(__dirname, '..');
 const ASSETS = path.join(ROOT, 'assets');
 const ASSET_TYPES = { '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.woff': 'font/woff' };
+const PHOTO_ASSETS = ['hero.jpg', 'box.jpg', 'founder.jpg']; // optional photos the landing page picks up when present
 const COOKIE = 'club_session';
 const PUBLIC_COMMANDS = new Set(['creator.apply']);
 
@@ -139,7 +140,7 @@ function createApp(options = {}) {
     const session = sessionOf(req);
 
     if (req.method === 'GET' && url.pathname === '/api/session') {
-      return json(res, 200, { mode: 'remote', authenticated: !!session, role: session?.role || null, email: session?.email || null, creatorId: session?.creatorId || null, name: session?.name || null, mailMode: cfg.mailMode, revision: state.revision, logo: fs.existsSync(path.join(ASSETS, 'logo.png')) });
+      return json(res, 200, { mode: 'remote', authenticated: !!session, role: session?.role || null, email: session?.email || null, creatorId: session?.creatorId || null, name: session?.name || null, mailMode: cfg.mailMode, revision: state.revision, logo: fs.existsSync(path.join(ASSETS, 'logo.png')), assets: PHOTO_ASSETS.filter(f => fs.existsSync(path.join(ASSETS, f))) });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/auth/request') {

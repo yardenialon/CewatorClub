@@ -164,6 +164,7 @@ class ConnectedMode(unittest.TestCase):
         page.fill("#wiz-input", "9000"); page.keyboard.press("Enter")
         page.locator('[data-action="wizChoice"][data-name="engagement"][data-value="unknown"]').click()
         page.fill("#wiz-input", "Connected testing"); page.keyboard.press("Enter")
+        page.locator('[data-action="wizToggle"][data-value="gym"]').click(); page.locator('[data-action="wizNext"]').click()
         page.locator('[data-action="wizChoice"][data-name="fit"][data-value="60"]').click()
         page.locator('[data-action="wizChoice"][data-name="dealPreference"][data-value="either"]').click()
         page.locator('#wiz-form input[name="consent"]').check()
@@ -172,6 +173,7 @@ class ConnectedMode(unittest.TestCase):
         c = next(c for c in self.server_state()["creators"] if c["email"] == "connected@example.test")
         self.assertEqual(c["url"], "https://youtube.com/@connected")
         self.assertEqual(c["engagement"], 2)  # "not sure" maps to the middle tier until the admin verifies
+        self.assertEqual(c["interests"], ["gym"])
         page.locator("#wiz-done").click()
         page.locator(".ld-hero").wait_for()
         page.close()

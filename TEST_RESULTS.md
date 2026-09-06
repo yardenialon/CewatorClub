@@ -8,7 +8,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 | Suite | Command | Result |
 |-------|---------|--------|
 | Bundle freshness | `python build.py --check` | pass |
-| Business rules | `node test_core.js` | 54 / 54 pass |
+| Business rules | `node test_core.js` | 59 / 59 pass |
 | Formatting helpers | `node test_format.js` | 15 / 15 pass |
 | Server API | `node test_server.js` | 17 / 17 pass |
 | Browser flow, offline prototype | `python test_ui.py` | 18 / 18 pass |
@@ -41,7 +41,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 6. Creator reports publication; admin verifies; admin records payment `DEMO-001`.
 7. State survives a page reload.
 8. New mission form creates a mission.
-9. Application wizard: empty name and missing links show inline errors; Enter advances; choices auto-advance; summary shows the entered name; consent is enforced; the stored creator has the right platform, primary URL derived from it, extra links, numeric metrics and deal preference; the done screen leads back to the creators table.
+9. Application wizard: empty name and missing links show inline errors; Enter advances; choices auto-advance; the interests step refuses an empty pick, toggles chips on and off and stores the selection; summary shows the entered name; consent is enforced; the stored creator has the right platform, primary URL derived from it, extra links, numeric metrics and deal preference; the done screen leads back to the creators table.
 10. Reset restores the seed.
 11. Mobile viewport (390 px) shows the menu toggle and opens the sidebar.
 12. Admin rejects a pending applicant through the confirm + reason prompts.

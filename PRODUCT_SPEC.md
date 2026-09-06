@@ -85,6 +85,13 @@ For micro-influencers who work without a cash fee. Chosen per offer (`deal: 'aff
 - Same workflow as paid deals. At **record payment** the admin enters the sales attributed to the code; the system stores `salesTotal` and computes `amount = salesTotal × creatorShare`. Attribution is manual; there is no store integration.
 - Stats: `recorded` = recorded fees + commissions; `committed` uses fees only, so commissions never touch mission budgets; `commissions` and `affiliateOpen` are reported separately.
 
+### 4c. Audience interests (taxonomy)
+
+- `ClubCore.INTERESTS` is a fixed list of 35 interest ids in 8 clusters (`INTEREST_CLUSTERS`); labels live in `i18n.json` (`int_<id>`, `cluster_<id>`). Changing the taxonomy is a code change, on purpose: it keeps data comparable over time.
+- `creator.interests` and `mission.interests` are arrays of ids, de-duplicated, at most 8 (`MAX_INTERESTS`), validated by `cleanInterests` on `creator.apply`, `mission.create`, `mission.update` and on state load. Unknown ids fail with `invalidInterests`.
+- `interestMatch(creator, mission)` returns the shared ids in taxonomy order. The invitation modal ranks eligible creators by that count; the creator portal marks collaborations with any overlap "Made for you"; the public landing page renders the clusters as "Who it's for".
+- The application wizard asks for up to 6 interests (question 9 of 11); the admin form allows up to 8.
+
 ## 5. Dashboard metrics (per market)
 
 | Metric | Definition |
@@ -124,6 +131,13 @@ ILS and USD are never summed together.
 - Structure follows a single decision path: promise (hero) → proof strip → how it works → the two tracks → what the product is / what we never ask → objections (FAQ) → final call. Every number on the page is backed by a rule in `core.js` (20% pool, 10/10 split, two markets, human approval); there are no invented testimonials or follower counts.
 - Copy principles: second person, presuppositions about the creator's existing audience, low-commitment first step ("2 minutes", "no cost, no commitment, no script"), explicit autonomy ("your voice, your pace", "you can change later"), and objections answered before the call to action.
 - Brand assets: `assets/logo.png` (optional) is served at `/assets/logo.png`, inlined by `build.py`, and probed only when `/api/session` reports it exists; otherwise an SVG wordmark is drawn. Heebo is self-hosted under `assets/fonts/` and loaded only over HTTP, so the offline file never makes a request.
+
+### 6c. Public landing page and brand assets (v0.3.1)
+
+- Signed-out visitors in connected mode land on a product-first page: product, the box, who it's for (interest clusters), how it works, the two tracks, the numbers, what SimpliiGood is / what we never ask, objections, final call. Sign-in is a separate screen.
+- Optional files under `assets/` are detected by the server (`/api/session` lists them) and picked up without a rebuild: `logo.png` (all screens; white variant derived with CSS), `hero.jpg`, `box.jpg`. Until they exist the page draws illustrated stand-ins, never placeholder text.
+- Heebo is self-hosted under `assets/fonts` and loaded only over HTTP; the offline file makes no network requests. CSP allows `'self'` images and fonts only.
+- Vocabulary: the UI says "collaborations" and "invitations"; the command names (`mission.*`, `assignment.offer`) are unchanged for API stability.
 
 ## 7. Security posture of the prototype
 

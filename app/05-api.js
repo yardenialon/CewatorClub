@@ -10,6 +10,7 @@ async function remoteBoot(){
   if(!/^https?:$/.test(location.protocol))return false;
   let ses;try{ses=await api('/api/session');}catch(_){return false;}
   if(ses&&ses.logo)serverLogo=true; // both serve.py and server/index.js say whether assets/logo.png exists
+  if(ses&&Array.isArray(ses.assets))serverAssets=ses.assets; // photos dropped into assets/ (hero.jpg, box.jpg, founder.jpg)
   if(!ses||ses.mode!=='remote')return false;
   remote=ses;
   if(ses.authenticated){
@@ -33,7 +34,8 @@ function requestLink(email){return api('/api/auth/request',{method:'POST',body:J
 function logout(){api('/api/auth/logout',{method:'POST'}).then(()=>{location.href='/';}).catch(()=>{location.href='/';});}
 
 /* Brand assets. The logo is optional (assets/logo.png); until it exists every screen shows a wordmark. */
-let serverLogo=false;
+let serverLogo=false, serverAssets=[];
+const hasAsset=name=>serverAssets.includes(name);
 function probeLogo(){
   return new Promise(resolve=>{
     if(!LOGO_SRC||(!LOGO_SRC.startsWith('data:')&&!serverLogo))return resolve(false); // never request a file the server does not have

@@ -22,7 +22,12 @@ class Handler(SimpleHTTPRequestHandler):
         # The page asks whether a club server is behind it. This one is static: answer "local"
         # so the prototype keeps using browser storage (and the console stays clean).
         if self.path.split("?")[0] == "/api/session":
-            body = json.dumps({"mode": "local", "logo": (ROOT / "assets" / "logo.png").is_file()}).encode()
+            assets = ROOT / "assets"
+            body = json.dumps({
+                "mode": "local",
+                "logo": (assets / "logo.png").is_file(),
+                "assets": [f for f in ("hero.jpg", "box.jpg", "founder.jpg") if (assets / f).is_file()],
+            }).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
