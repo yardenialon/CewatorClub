@@ -158,6 +158,7 @@ class ConnectedMode(unittest.TestCase):
         page.locator('[data-action="wizNext"]').click()
         page.fill("#wiz-input", "Connected Applicant / Demo"); page.keyboard.press("Enter")
         page.fill("#wiz-input", "connected@example.test"); page.keyboard.press("Enter")
+        page.fill("#wiz-input", "+1 212 555 0100"); page.keyboard.press("Enter")
         page.locator('[data-action="wizChoice"][data-name="market"][data-value="US"]').click()
         page.fill("#wiz-link-youtube", "https://youtube.com/@connected"); page.keyboard.press("Enter")
         page.locator('[data-action="wizChoice"][data-name="platform"][data-value="YouTube"]').click()
@@ -174,6 +175,7 @@ class ConnectedMode(unittest.TestCase):
         self.assertEqual(c["url"], "https://youtube.com/@connected")
         self.assertEqual(c["engagement"], 2)  # "not sure" maps to the middle tier until the admin verifies
         self.assertEqual(c["interests"], ["gym"])
+        self.assertEqual(c["phone"], "+12125550100")
         page.locator("#wiz-done").click()
         page.locator(".ld-hero").wait_for()
         page.close()

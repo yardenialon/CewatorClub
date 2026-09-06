@@ -179,6 +179,11 @@ class DemoFlow(unittest.TestCase):
         self.wiz_type("UI Applicant / Demo")
         page.locator('.wizard-card[data-step="email"]').wait_for()
         self.wiz_type("ui@example.test")
+        page.locator('.wizard-card[data-step="phone"]').wait_for()
+        self.wiz_type("abc")  # not a phone number -> inline error
+        page.locator(".wiz-error").wait_for()
+        page.fill("#wiz-input", "")
+        self.wiz_type("050-123 4567")
         page.locator('.wizard-card[data-step="market"]').wait_for()
         self.wiz_pick("market", "IL")
         page.locator('.wizard-card[data-step="links"]').wait_for()
@@ -222,6 +227,7 @@ class DemoFlow(unittest.TestCase):
         self.assertEqual(c["links"]["instagram"], "https://instagram.com/ui.demo")
         self.assertEqual((c["audience"], c["engagement"], c["fit"], c["dealPreference"]), (5000, 4, 80, "affiliate"))
         self.assertEqual(c["interests"], ["smoothies"])
+        self.assertEqual(c["phone"], "0501234567")  # normalised: spaces and dashes stripped
         page.locator("#wiz-done").click()
         page.locator("#creator-table").wait_for()
 

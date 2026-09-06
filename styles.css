@@ -1942,3 +1942,16 @@ body.modal-open {
 .wiz-chip:hover { border-color: #ffffff77; }
 .wiz-chip.active { border-color: var(--sun); background: var(--sun); color: var(--ink); }
 
+/* Wizard: input with a leading icon (e-mail, phone) so the field type is unmistakable */
+.wiz-field { display: flex; align-items: center; gap: 12px; border-bottom: 3px solid #ffffff55; }
+.wiz-field:focus-within { border-bottom-color: var(--sun); }
+.wiz-field .icon { width: 26px; height: 26px; color: var(--sun); flex-shrink: 0; }
+.wiz-field .wiz-input { border-bottom: 0; text-align: start; }
+.wiz-field .wiz-input::placeholder { color: #ffffff77; }
+/* The generic input rule (input:not([type=checkbox])) outranks .wiz-input; restate the wizard look at higher specificity. */
+.wizard input.wiz-input, .wizard .wiz-link input { background: transparent; border: 0; border-radius: 0; color: #fff; min-height: 0; padding-inline: 4px; }
+.wizard input.wiz-input:not(.wiz-field .wiz-input) { border-bottom: 3px solid #ffffff55; }
+.wizard input.wiz-input:not(.wiz-field .wiz-input):focus { border-bottom-color: var(--sun); }
+.wizard input.wiz-input::placeholder, .wizard .wiz-link input::placeholder { color: #ffffff77; }
+.wizard input.wiz-input:focus-visible, .wizard .wiz-link input:focus-visible { outline: none; } /* the sun underline is the focus indicator */
+

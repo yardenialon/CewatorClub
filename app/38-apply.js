@@ -1,6 +1,6 @@
 /* Creator application: a conversational, one-question-per-screen flow.
    Collects the same fields creator.apply needs, plus up to five social links. */
-const WIZ_STEPS=['intro','name','email','market','links','platform','audience','engagement','niche','interests','fit','deal','consent'];
+const WIZ_STEPS=['intro','name','email','phone','market','links','platform','audience','engagement','niche','interests','fit','deal','consent'];
 const WIZ_MAX_INTERESTS=6;
 const WIZ_QUESTIONS=WIZ_STEPS.length-2; // intro and consent are not counted as questions
 const LINK_META=[['instagram','instagram','linkInstagram','https://instagram.com/…'],['tiktok','tiktok','linkTiktok','https://tiktok.com/@…'],['youtube','youtube','linkYoutube','https://youtube.com/@…'],['facebook','facebook','linkFacebook','https://facebook.com/…'],['website','globe','linkWebsite','https://…']];
@@ -13,6 +13,7 @@ function wizValidate(step){
  switch(step){
   case 'name': return String(d.name||'').trim().length>=2?'':'wizErrName';
   case 'email': return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)?'':'wizErrEmail';
+  case 'phone': { try{ return C.cleanPhone(d.phone)?'':'wizErrPhone'; }catch(_){ return 'wizErrPhone'; } }
   case 'market': return ['IL','US'].includes(d.market)?'':'wizErrChoice';
   case 'links': { const links=d.links||{}; const filled=Object.values(links).filter(v=>String(v||'').trim()); if(!filled.length)return 'wizErrLinks'; try{filled.forEach(v=>C.https(String(v).trim()));}catch(_){return 'wizErrLinks';} return ''; }
   case 'platform': return d.platform?'':'wizErrChoice';
@@ -34,7 +35,8 @@ function wizBody(step){
  switch(step){
   case 'intro': return '<span class="wizard-step">SimpliiGood / Creator Club</span><h1>'+e(t('wizIntroTitle'))+'</h1><p class="sub">'+e(t('wizIntroSub'))+'</p><div class="wiz-perks"><div class="wiz-perk">'+icon('bag')+e(t('wizPerk1'))+'</div><div class="wiz-perk">'+icon('brief')+e(t('wizPerk2'))+'</div><div class="wiz-perk">'+icon('wallet')+e(t('wizPerk3'))+'</div></div><div class="wiz-nav"><button type="button" class="btn sun" data-action="wizNext">'+e(t('wizStart'))+icon('arrow')+'</button>'+(remote?'<button type="button" class="btn ghost" data-action="mode" data-view="login">'+e(t('loginTitle'))+'</button>':'<button type="button" class="btn ghost" data-action="mode" data-view="admin">'+e(t('backAdmin'))+'</button>')+'</div><p class="wiz-hint" style="margin-top:22px">'+e(t('consentToDemo'))+'</p>';
   case 'name': return '<h1>'+e(t('wizNameQ'))+'</h1><p class="sub">'+e(t('wizNameSub'))+'</p>'+wizInput('name','text',t('wizNamePh'),'maxlength="120"')+nav();
-  case 'email': return '<h1>'+e(t('wizEmailQ'))+'</h1><p class="sub">'+e(t('wizEmailSub'))+'</p>'+wizInput('email','email','creator@example.test','maxlength="254" inputmode="email"')+nav();
+  case 'email': return '<h1>'+e(t('wizEmailQ'))+'</h1><p class="sub">'+e(t('wizEmailSub'))+'</p><div class="wiz-field">'+icon('mail')+wizInput('email','email',t('wizEmailPh'),'maxlength="254" inputmode="email" autocomplete="email" dir="ltr"')+'</div>'+nav();
+  case 'phone': return '<h1>'+e(t('wizPhoneQ'))+'</h1><p class="sub">'+e(t('wizPhoneSub'))+'</p><div class="wiz-field">'+icon('phone')+wizInput('phone','tel',t(lang==='he'?'wizPhonePhIL':'wizPhonePhUS'),'maxlength="24" inputmode="tel" autocomplete="tel" dir="ltr"')+'</div>'+nav();
   case 'market': return '<h1>'+e(t('wizMarketQ'))+'</h1><p class="sub">'+e(t('wizMarketSub'))+'</p><div class="wiz-choices">'+wizChoice('market','IL',t('israel'),'ILS')+wizChoice('market','US',t('usa'),'USD')+'</div>'+choicesNav;
   case 'links': return '<h1>'+e(t('wizLinksQ'))+'</h1><p class="sub">'+e(t('wizLinksSub'))+'</p><div class="wiz-links">'+LINK_META.map(([k,ic,label,ph],i)=>'<div class="wiz-link">'+icon(ic)+'<label for="wiz-link-'+k+'">'+e(t(label))+'</label><input id="wiz-link-'+k+'" '+(i===0?'data-first="1"':'')+' name="'+k+'" type="url" value="'+e(links[k]||'')+'" placeholder="'+e(ph)+'" autocomplete="off" maxlength="2000" data-wiz="links.'+k+'"></div>').join('')+'</div>'+nav();
   case 'platform': return '<h1>'+e(t('wizPlatformQ'))+'</h1><p class="sub">'+e(t('wizPlatformSub'))+'</p><div class="wiz-choices">'+['Instagram','TikTok','YouTube','Facebook','Blog','Newsletter'].map(p=>wizChoice('platform',p,p)).join('')+'</div>'+choicesNav;
@@ -47,7 +49,7 @@ function wizBody(step){
   case 'consent': {
    const filledLinks=LINK_META.filter(([k])=>links[k]).map(([k,,label])=>t(label)).join(', ');
    const row=(k,v)=>'<div><span>'+e(t(k))+'</span><span><bdi>'+e(v)+'</bdi></span></div>';
-   return '<h1>'+e(t('wizConsentQ'))+'</h1><p class="sub">'+e(t('wizConsentSub'))+'</p><form id="wiz-form"><div class="wiz-summary">'+row('wizSummaryName',d.name)+row('email',d.email)+row('market',t(d.market==='IL'?'israel':'usa'))+row('platform',d.platform)+row('followers',String(d.audience))+row('wizSummaryLinks',filledLinks)+row('niche',d.niche)+row('wizSummaryInterests',(d.interests||[]).map(id=>t('int_'+id)).join(', '))+row('dealPreference',t({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[d.dealPreference]))+'</div><label class="check"><input type="checkbox" name="consent" data-wiz="consent" '+(d.consent?'checked':'')+'> <span>'+e(t('consent'))+'</span></label><div class="wiz-nav"><button type="submit" class="btn sun">'+e(t('wizSend'))+icon('arrow')+'</button><button type="button" class="btn ghost" data-action="wizBack">'+e(t('wizBack'))+'</button></div></form>';
+   return '<h1>'+e(t('wizConsentQ'))+'</h1><p class="sub">'+e(t('wizConsentSub'))+'</p><form id="wiz-form"><div class="wiz-summary">'+row('wizSummaryName',d.name)+row('email',d.email)+row('phone',d.phone)+row('market',t(d.market==='IL'?'israel':'usa'))+row('platform',d.platform)+row('followers',String(d.audience))+row('wizSummaryLinks',filledLinks)+row('niche',d.niche)+row('wizSummaryInterests',(d.interests||[]).map(id=>t('int_'+id)).join(', '))+row('dealPreference',t({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[d.dealPreference]))+'</div><label class="check"><input type="checkbox" name="consent" data-wiz="consent" '+(d.consent?'checked':'')+'> <span>'+e(t('consent'))+'</span></label><div class="wiz-nav"><button type="submit" class="btn sun">'+e(t('wizSend'))+icon('arrow')+'</button><button type="button" class="btn ghost" data-action="wizBack">'+e(t('wizBack'))+'</button></div></form>';
   }
   default: return '';
  }
@@ -90,7 +92,7 @@ function submitApplication(){
  const err=wizValidate('consent'); if(err){applyError=err;render();return;}
  const d=applyData;
  const links={}; for(const [k] of LINK_META){const v=String((d.links||{})[k]||'').trim(); if(v)links[k]=v;}
- const payload={name:String(d.name||'').trim(),email:String(d.email||'').trim(),market:d.market,platform:d.platform,audience:Number(String(d.audience).replace(/[,\s]/g,'')),engagement:d.engagement==='unknown'?2:Number(d.engagement),fit:Number(d.fit),niche:String(d.niche||'').trim(),links,interests:d.interests||[],dealPreference:d.dealPreference,consent:!!d.consent};
+ const payload={name:String(d.name||'').trim(),email:String(d.email||'').trim(),phone:String(d.phone||'').trim(),market:d.market,platform:d.platform,audience:Number(String(d.audience).replace(/[,\s]/g,'')),engagement:d.engagement==='unknown'?2:Number(d.engagement),fit:Number(d.fit),niche:String(d.niche||'').trim(),links,interests:d.interests||[],dealPreference:d.dealPreference,consent:!!d.consent};
  const done=()=>{applyDone=true;applyError='';render();window.scrollTo(0,0);};
  const showError=msg=>{applyError=msg;render();};
  if(remote){remoteAct('creator.apply',payload,{onSuccess:done,onError:showError});return;}

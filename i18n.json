@@ -383,8 +383,8 @@
     "wizNameQ": "איך קוראים לך?",
     "wizNameSub": "השם שמופיע בערוץ. לא צריך תעודת זהות.",
     "wizNamePh": "למשל: נועה גרין",
-    "wizEmailQ": "לאן לשלוח הצעות?",
-    "wizEmailSub": "בלי ספאם. נכתוב רק כשיש משהו שווה.",
+    "wizEmailQ": "מה כתובת המייל שלך?",
+    "wizEmailSub": "לשם נשלח הזמנות וקישור כניסה. בלי ספאם, רק כשיש משהו שווה.",
     "wizMarketQ": "איפה הקהל שלך?",
     "wizMarketSub": "שיתופי הפעולה והמטבע נקבעים לפי השוק. אפשר להיות בשניהם, אבל בוחרים בית אחד.",
     "wizLinksQ": "איפה אפשר למצוא אותך?",
@@ -579,7 +579,15 @@
     "ldBoxNote": "תכולת החבילה משתנה לפי שיתוף הפעולה ומופיעה בכתב בכל הזמנה.",
     "ldFitEyebrow": "למי זה מתאים",
     "ldFitTitle": "אם התוכן שלך חי באחד מהעולמות האלה, זה בשבילך.",
-    "ldFitNote": "אין מספר עוקבים מינימלי. יש קהל שמקשיב."
+    "ldFitNote": "אין מספר עוקבים מינימלי. יש קהל שמקשיב.",
+    "wizEmailPh": "noa@gmail.com",
+    "wizPhoneQ": "ובאיזה מספר אפשר להשיג אותך?",
+    "wizPhoneSub": "לוואטסאפ או לשיחה קצרה כשיש שיתוף פעולה מתאים. לא לשיווק.",
+    "wizPhonePhIL": "050-1234567",
+    "wizPhonePhUS": "+1 212 555 0100",
+    "wizErrPhone": "המספר לא נראה נכון. ספרות בלבד, אפשר עם קידומת +.",
+    "phone": "טלפון",
+    "invalidPhone": "מספר הטלפון אינו תקין."
   },
   "en": {
     "app": "Creator Club",
@@ -965,8 +973,8 @@
     "wizNameQ": "What should we call you?",
     "wizNameSub": "The name on your channel. No ID required.",
     "wizNamePh": "e.g. Noa Green",
-    "wizEmailQ": "Where do we send offers?",
-    "wizEmailSub": "No spam. We only write when there’s something worth it.",
+    "wizEmailQ": "What’s your e-mail address?",
+    "wizEmailSub": "That’s where invitations and your sign-in link go. No spam, only when there’s something worth it.",
     "wizMarketQ": "Where is your audience?",
     "wizMarketSub": "Collaborations and currency follow the market. You can be in both, but pick one home.",
     "wizLinksQ": "Where can we find you?",
@@ -1161,6 +1169,14 @@
     "ldBoxNote": "Box contents vary per collaboration and are listed in writing on every invitation.",
     "ldFitEyebrow": "Who it’s for",
     "ldFitTitle": "If your content lives in one of these worlds, this is for you.",
-    "ldFitNote": "No minimum follower count. Just an audience that listens."
+    "ldFitNote": "No minimum follower count. Just an audience that listens.",
+    "wizEmailPh": "noa@gmail.com",
+    "wizPhoneQ": "And what number can we reach you on?",
+    "wizPhoneSub": "For WhatsApp or a short call when a collaboration fits. Never for marketing.",
+    "wizPhonePhIL": "050-1234567",
+    "wizPhonePhUS": "+1 212 555 0100",
+    "wizErrPhone": "That number doesn’t look right. Digits only, a + prefix is fine.",
+    "phone": "Phone",
+    "invalidPhone": "The phone number is invalid."
   }
 }

@@ -42,6 +42,13 @@
     if(out.length>MAX_INTERESTS)fail('invalidInterests');
     return out;
   }
+  /* Phone: digits with an optional leading +, 7 to 15 digits; spaces, dashes and parentheses are stripped. */
+  function cleanPhone(raw){
+    if(raw===undefined||raw===null||String(raw).trim()==='')return '';
+    const s=String(raw).trim().replace(/[\s\-().]/g,'');
+    if(!/^\+?\d{7,15}$/.test(s))fail('invalidPhone');
+    return s;
+  }
   /* Interests a creator and a mission share, in taxonomy order. */
   function interestMatch(creator,mission){ const a=new Set(creator?.interests||[]); return (mission?.interests||[]).filter(id=>a.has(id)); }
   function cleanLinks(raw){ const out={}; if(raw&&typeof raw==='object'&&!Array.isArray(raw)) for(const k of LINK_KEYS){ const v=raw[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='') out[k]=https(String(v).trim()); } return out; }
@@ -131,6 +138,7 @@
       if(c.dealPreference!==undefined&&!['fee','affiliate','either'].includes(c.dealPreference))fail('invalidBackup');
       if(c.links!==undefined){if(!c.links||typeof c.links!=='object'||Array.isArray(c.links))fail('invalidBackup');for(const [k,v] of Object.entries(c.links)){if(!LINK_KEYS.includes(k))fail('invalidBackup');https(v);}}
       if(c.interests!==undefined){if(!Array.isArray(c.interests))fail('invalidBackup');try{cleanInterests(c.interests);}catch(_){fail('invalidBackup');}}
+      if(c.phone!==undefined){if(typeof c.phone!=='string')fail('invalidBackup');try{cleanPhone(c.phone);}catch(_){fail('invalidBackup');}}
       ids.add(c.id);cids.set(c.id,c);
     }
     for(const m of s.missions){
@@ -186,7 +194,8 @@
       const dealPreference=p.dealPreference||'either';if(!['fee','affiliate','either'].includes(dealPreference))fail('required');
       const links=cleanLinks(p.links);const primary={Instagram:'instagram',TikTok:'tiktok',YouTube:'youtube',Facebook:'facebook'}[p.platform]||'website';
       const url=p.url?https(p.url):(links[primary]||Object.values(links)[0]);if(!url)fail('unsafeUrl');
-      const c={id:uid('c'),name:text(p.name,120,2),email,market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url,...(Object.keys(links).length?{links}:{}),interests:cleanInterests(p.interests),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
+      const phone=cleanPhone(p.phone);
+      const c={id:uid('c'),name:text(p.name,120,2),email,...(phone?{phone}:{}),market:p.market,platform:p.platform,audience:num(p.audience,0,1000000000),engagement:num(p.engagement,0,100),fit:num(p.fit,0,100),niche:text(p.niche,300,2),url,...(Object.keys(links).length?{links}:{}),interests:cleanInterests(p.interests),dealPreference,status:'pending',metricsVerified:false,createdAt:now};
       if(!Number.isInteger(c.audience))fail('required');s.creators.push(c);subject=c.name;
     } else if(command==='creator.approve'||command==='creator.verify'||command==='creator.reject'){
       admin();const c=s.creators.find(x=>x.id===p.id);if(!c)fail('required');
@@ -263,5 +272,5 @@
     }else fail('statusInvalid');
     s.revision++;s.updatedAt=now;s.activity.unshift({id:uid('log'),at:now,action:command,actor:actor.role,subject});s.activity=s.activity.slice(0,5000);validateState(s);return s;
   }
-  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor,LINK_KEYS,INTERESTS,INTEREST_CLUSTERS,MAX_INTERESTS,cleanInterests,interestMatch};
+  return {VERSION,createSeed,validateState,dispatch,quote,allocation,missionCount,stats,currency,https,today,future,titleText,briefText,statuses,affiliateConfig,promoCodeFor,LINK_KEYS,INTERESTS,INTEREST_CLUSTERS,MAX_INTERESTS,cleanInterests,interestMatch,cleanPhone};
 });

@@ -90,7 +90,8 @@ For micro-influencers who work without a cash fee. Chosen per offer (`deal: 'aff
 - `ClubCore.INTERESTS` is a fixed list of 35 interest ids in 8 clusters (`INTEREST_CLUSTERS`); labels live in `i18n.json` (`int_<id>`, `cluster_<id>`). Changing the taxonomy is a code change, on purpose: it keeps data comparable over time.
 - `creator.interests` and `mission.interests` are arrays of ids, de-duplicated, at most 8 (`MAX_INTERESTS`), validated by `cleanInterests` on `creator.apply`, `mission.create`, `mission.update` and on state load. Unknown ids fail with `invalidInterests`.
 - `interestMatch(creator, mission)` returns the shared ids in taxonomy order. The invitation modal ranks eligible creators by that count; the creator portal marks collaborations with any overlap "Made for you"; the public landing page renders the clusters as "Who it's for".
-- The application wizard asks for up to 6 interests (question 9 of 11); the admin form allows up to 8.
+- The application wizard asks for up to 6 interests (question 10 of 12); the admin form allows up to 8.
+- `creator.phone` (optional in the data model, required by the wizard): digits with an optional `+`, 7 to 15 digits, normalised by `cleanPhone`; shown to admins in the creator detail as a `tel:` link.
 
 ## 5. Dashboard metrics (per market)
 
