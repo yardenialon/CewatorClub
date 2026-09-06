@@ -203,6 +203,8 @@ if (require.main === module) {
     console.log(`SimpliiGood Creator Club server: ${url}/`);
     console.log(`Admin e-mails: ${cfg.adminEmails.join(', ')} | mail mode: ${cfg.mailMode} | data: ${cfg.dataDir}`);
     if (cfg.mailMode === 'dev') console.log('Sign-in links are written to data/outbox and shown in the UI (dev mode).');
+    if (cfg.mailMode === 'console') console.log('No mail provider configured: sign-in links are printed to this log only. Set CLUB_MAIL_WEBHOOK_URL to send e-mail.');
+    if (cfg.isProd && !cfg.baseUrl) console.log('Warning: CLUB_BASE_URL is not set; sign-in links will use the request host.');
   }).catch(err => { console.error(err.message); process.exit(1); });
 }
 

@@ -1,0 +1,13 @@
+{
+  "name": "simpliigood-creator-club",
+  "version": "0.3.0",
+  "private": true,
+  "description": "SimpliiGood Creator Club: bilingual creator & ambassador programme (offline prototype + dependency-free Node server).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/index.js",
+    "build": "python3 build.py",
+    "test": "node test_core.js && node test_format.js && node test_server.js"
+  },
+  "dependencies": {}
+}

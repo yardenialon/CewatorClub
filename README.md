@@ -136,8 +136,21 @@ CLUB_ADMIN_EMAILS=you@example.com node server/index.js
   מגדירים `CLUB_MAIL_MODE=webhook` ו־`CLUB_MAIL_WEBHOOK_URL` שמקבל JSON עם `to`, `subject`, `text` (כל שירות
   מייל או אוטומציה שיש לו נקודת קצה כזו). כל המשתנים מתועדים ב־`.env.example`.
 
-**לפני חשיפה לאינטרנט:** `NODE_ENV=production`, `CLUB_SECRET` באורך 32 תווים לפחות, `CLUB_BASE_URL` עם https,
-reverse proxy עם TLS, ו־`CLUB_HOST=0.0.0.0` רק מאחוריו. עדיין אין תשלומים, העלאת קבצים, חיבור לרשתות או AI.
+### פריסה ל־Railway (או Render / Fly)
+
+1. ב־Railway: New Project → Deploy from GitHub → בוחרים את המאגר. ב־Settings → Source מוודאים שהענף הוא זה שמכיל את הקוד
+   (עד המיזוג ל־`main`: `claude/migrate-gpt-project-r4zne5`).
+2. Settings → Volumes → מוסיפים Volume עם Mount Path `/data`, וב־Variables מגדירים `CLUB_DATA_DIR=/data`.
+   בלי זה כל פריסה מוחקת את הנתונים.
+3. Variables: `CLUB_ADMIN_EMAILS=you@example.com`. `PORT`, הכתובת הציבורית וההאזנה על כל הממשקים מזוהים אוטומטית.
+4. Settings → Networking → Generate Domain. הכתובת נכנסת אוטומטית לקישורי הכניסה (`RAILWAY_PUBLIC_DOMAIN`).
+5. עד שיש ספק מייל, קישורי הכניסה מודפסים ללוג של השרת (מצב `console`). פותחים Deployments → View logs,
+   מעתיקים את הקישור ונכנסים. כשיש ספק: `CLUB_MAIL_MODE=webhook` ו־`CLUB_MAIL_WEBHOOK_URL`.
+
+`railway.json` ו־`package.json` שבמאגר מגדירים את פקודת ההפעלה ובדיקת התקינות (`/api/session`). אין תלויות להתקין.
+
+**לפני חשיפה לאינטרנט:** `CLUB_SECRET` באורך 32 תווים לפחות (אחרת נוצר אוטומטית ונשמר ב־`data/secret.key`), כתובת https,
+ולעולם לא `CLUB_MAIL_MODE=dev` על שרת ציבורי, כי במצב הזה קישור הכניסה מוחזר לדפדפן. עדיין אין תשלומים, העלאת קבצים, חיבור לרשתות או AI.
 
 ## קבצי המקור
 

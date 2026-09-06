@@ -90,6 +90,10 @@ async function deliver(email, url, cfg) {
     if (!res.ok) throw new Error('mail webhook responded ' + res.status);
     return { delivered: true };
   }
+  if (cfg.mailMode === 'console') {
+    console.log(`[mail] sign-in link for ${email}: ${url}`);
+    return { delivered: false };
+  }
   const dir = path.join(cfg.dataDir, 'outbox');
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, new Date().toISOString().replace(/[:.]/g, '-') + '-' + email.replace(/[^a-z0-9@.]/gi, '_') + '.txt');
