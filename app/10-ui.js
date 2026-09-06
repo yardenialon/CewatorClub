@@ -27,6 +27,16 @@ const icons={
  sparkle:'<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3Z"/>'
 };
 function icon(name){return '<svg class="icon '+(name==='arrow'?'arrow-icon':'')+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[name]||icons.leaf)+'</svg>';}
+/* Brand: the real logo when assets/logo.png is available, otherwise a typographic wordmark.
+   variant 'dark' = teal on light backgrounds, 'light' = white on dark ones (derived with CSS). */
+function brandLogo(variant='dark',cls=''){
+ const inner=logoOk?'<img class="logo-img" src="'+e(LOGO_SRC)+'" alt="SimpliiGood Spirulina" decoding="async">':'<svg class="wordmark" viewBox="0 0 400 130" role="img" aria-label="SimpliiGood Spirulina"><text x="0" y="47" font-size="52" textLength="400" lengthAdjust="spacingAndGlyphs">SIMPLiiGOOD</text><text x="0" y="126" font-size="86" textLength="400" lengthAdjust="spacingAndGlyphs">SPIRULINA</text></svg>';
+ return '<span class="brandmark logo-'+variant+' '+cls+'">'+inner+'</span>';
+}
+function publicHeader(opts={}){ // shared by the landing page and the sign-in screen
+ const dark=!!opts.dark;
+ return '<header class="pub-header'+(dark?' dark':'')+'"><a class="pub-brand" href="#top" data-action="mode" data-view="landing">'+brandLogo(dark?'light':'dark')+'<span class="brand-sub">CREATOR CLUB</span></a><nav class="pub-nav" aria-label="SimpliiGood">'+(opts.hideLogin?'':'<button type="button" class="pub-link" data-action="mode" data-view="login">'+e(t('ldNavLogin'))+'</button>')+'<button type="button" class="btn sun pub-cta" data-action="apply">'+e(t('ldNavJoin'))+icon('arrow')+'</button><button type="button" class="lang-btn" data-action="lang" aria-label="Change language">'+(lang==='he'?'EN':'HE')+'</button></nav></header>';
+}
 function amountLabel(a){return a.deal==='affiliate'?'<span class="affiliate-label"><strong>'+e(a.affiliate.creatorShare)+'%</strong> <span class="tiny muted">'+e(t('dealAffiliate'))+' / <bdi>'+e(a.affiliate.promoCode)+'</bdi></span></span>':fm(a.fees.total,a.fees.currency);}
 const prefKey=c=>({fee:'dealFee',affiliate:'dealAffiliate',either:'dealEither'}[c.dealPreference||'fee']);
 function btn(label,action,data='',cls=''){return '<button type="button" class="btn '+cls+'" data-action="'+action+'" '+data+'>'+e(t(label))+'</button>';}

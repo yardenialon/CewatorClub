@@ -1,0 +1,3 @@
+Heebo (variable font, Hebrew and Latin subsets) by Oded Ezer, Meir Sadan and the Heebo Project Authors.
+Licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org
+Source: https://github.com/OdedEzer/heebo (served subsets via Google Fonts, v28).

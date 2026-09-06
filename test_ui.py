@@ -333,6 +333,22 @@ class DemoFlow(unittest.TestCase):
         self.page.locator("#toast:not(.hide)").wait_for()
         self.assertEqual(self.state()["affiliate"], {"pool": 25, "creatorShare": 15})
 
+    def test_17_public_landing_page_offline(self):
+        page = self.page
+        page.locator('[data-action="mode"][data-view="landing"]').first.click()
+        page.locator(".ld-hero").wait_for()
+        self.assertGreaterEqual(page.locator(".ld-track").count(), 2)
+        page.locator(".faq-q").nth(1).click()
+        self.assertTrue(page.locator(".faq-item.open").is_visible())
+        before = page.evaluate("() => document.documentElement.dir")
+        page.locator('.pub-nav [data-action="lang"]').click()
+        self.assertNotEqual(page.evaluate("() => document.documentElement.dir"), before)
+        page.locator('.pub-nav [data-action="lang"]').click()
+        page.locator(".ld-final [data-action=\"apply\"]").click()
+        page.locator('.wizard-card[data-step="intro"]').wait_for()
+        page.locator('[data-action="mode"][data-view="admin"]').first.click()
+        page.locator(".brandmark").wait_for()
+
     def test_99_no_javascript_errors(self):
         self.assertEqual(self.errors, [])
 

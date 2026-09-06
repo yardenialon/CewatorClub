@@ -6,7 +6,7 @@ document.addEventListener('click',event=>{
  else if(a==='menu')$('#sidebar')?.classList.toggle('open');
  else if(a==='lang'){lang=lang==='he'?'en':'he';closeModal();render();}
  else if(a==='nav'){if(remote&&remote.role==='creator')return;view='admin';page=target.dataset.page;closeModal();render();window.scrollTo(0,0);}
- else if(a==='mode'){view=remote?(remote.authenticated?(remote.role==='creator'?'creator':'admin'):'login'):target.dataset.view;if(view==='apply')wizReset();closeModal();render();window.scrollTo(0,0);}
+ else if(a==='mode'){const want=target.dataset.view;view=remote&&remote.authenticated?(remote.role==='creator'?'creator':'admin'):(remote&&!['login','landing','apply'].includes(want)?'landing':want);if(view==='apply')wizReset();if(view==='login'){linkSentTo='';devLink='';}closeModal();render();window.scrollTo(0,0);}
  else if(a==='logout')logout();
  else if(a==='loginAgain'){linkSentTo='';devLink='';render();}
  else if(a==='market'){market=target.dataset.market;render();}
@@ -26,7 +26,9 @@ document.addEventListener('click',event=>{
  else if(a==='wizNext')wizNext();
  else if(a==='wizBack')wizBack();
  else if(a==='wizChoice')wizPick(target.dataset.name,target.dataset.value);
- else if(a==='wizDone'){wizReset();if(remote){view=remote.authenticated?'admin':'login';}else{view='admin';page='creators';market='all';}render();window.scrollTo(0,0);}
+ else if(a==='wizDone'){wizReset();if(remote){view=remote.authenticated?'admin':'landing';}else{view='admin';page='creators';market='all';}render();window.scrollTo(0,0);}
+ else if(a==='faq'){target.closest('.faq-item')?.classList.toggle('open');target.setAttribute('aria-expanded',String(target.closest('.faq-item')?.classList.contains('open')));}
+ else if(a==='scrollTo'){document.getElementById(target.dataset.target)?.scrollIntoView({behavior:'smooth',block:'start'});}
  else if(a==='buildBrief'){const f=$('#mission-form'),l=(f.elements.market?f.elements.market.value:f.dataset.market)==='US'?'en':'he';f.elements.brief.value=TRANSLATIONS[l].briefDefault;toast(t('briefGenerated'));}
  else if(a==='scroll-work')$('#my-work')?.scrollIntoView({behavior:'smooth',block:'start'});
  else if(a==='cancelWork'){if(confirm(t('cancelConfirm'))){const reason=prompt(t('cancelReason'),'Demo cancellation');if(reason)act('assignment.cancel',{id,reason});}}
@@ -69,4 +71,5 @@ document.addEventListener('keydown',event=>{
 });
 window.addEventListener('storage',event=>{if(remote||event.key!==KEY||!event.newValue)return;try{const next=JSON.parse(event.newValue);C.validateState(next);state=next;closeModal();render();toast(t('stale'));}catch(_){toast(t('invalidBackup'),true);}});
 window.ClubDemo={getState:()=>JSON.parse(JSON.stringify(state)),core:C};
-remoteBoot().then(isRemote=>{render();if(!isRemote&&loadError)toast(t(loadError),true);if(isRemote&&loginError)toast(t(loginError),true);}).catch(()=>{remote=null;render();});
+loadFonts();
+remoteBoot().catch(()=>{remote=null;return false;}).then(isRemote=>probeLogo().then(()=>isRemote)).then(isRemote=>{render();if(!isRemote&&loadError)toast(t(loadError),true);if(isRemote&&loginError)toast(t(loginError),true);});

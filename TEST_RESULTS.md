@@ -1,6 +1,6 @@
-# TEST_RESULTS — SimpliiGood Creator Club v0.3
+# TEST_RESULTS — SimpliiGood Creator Club v0.3.1
 
-Last run: 2026-09-05, Linux, Node 22, Python 3.11, Chromium 1194 (Playwright 1.56).
+Last run: 2026-09-06, Linux, Node 22, Python 3.11, Chromium 1194 (Playwright 1.56).
 All suites run automatically in GitHub Actions on every push (`.github/workflows/ci.yml`).
 
 ## Summary
@@ -11,7 +11,7 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 | Business rules | `node test_core.js` | 54 / 54 pass |
 | Formatting helpers | `node test_format.js` | 15 / 15 pass |
 | Server API | `node test_server.js` | 17 / 17 pass |
-| Browser flow, offline prototype | `python test_ui.py` | 17 / 17 pass |
+| Browser flow, offline prototype | `python test_ui.py` | 18 / 18 pass |
 | Browser flow, connected mode | `python test_ui_server.py` | 7 / 7 pass |
 
 ## What `test_core.js` covers (no browser)
@@ -49,7 +49,8 @@ All suites run automatically in GitHub Actions on every push (`.github/workflows
 14. Archive: refused on a mission with open work; a fresh mission is archived, disappears from the list, reappears under "show archived" without an offer button, and is restored.
 15. Affiliate offer: choosing an ambassador creator flips the deal type, hides fees, shows the split (10% / 10%, then 12% / 8% after editing), submits with zero budget impact.
 16. Ambassador settings form updates pool and default share.
-17. No JavaScript errors or console errors during the whole run.
+17. Public landing page (offline preview): tracks render, FAQ opens, language toggle flips direction, final call opens the wizard.
+18. No JavaScript errors or console errors during the whole run.
 
 ## What `test_format.js` covers
 
@@ -64,12 +65,12 @@ HTML escaping, initials, currency/number/date formatting per locale, CSV quoting
 
 ## What `test_ui_server.py` covers (Node server as a subprocess, headless Chromium)
 
-1. Anonymous visitor sees the sign-in screen, no demo role toggle, no creator picker.
-2. An invalid link lands back on the sign-in screen.
+1. Anonymous visitor sees the public landing page (no sign-in form, no demo role toggle, no creator picker); FAQ opens; hero call opens the wizard; wizard → sign-in → back to landing.
+2. An invalid link lands on the sign-in screen.
 3. Admin signs in through the dev link, creates a mission, it lands in `data/state.json`, and survives a reload with localStorage cleared.
 4. Creator signs in, sees only her own portal and work, accepts her offer, and the server records it.
-5. Sign out returns to the sign-in screen.
-6. Public application wizard works without a session; "not sure" engagement maps to 2; the done screen returns to sign-in.
+5. Sign out returns to the public landing page.
+6. Public application wizard works without a session; "not sure" engagement maps to 2; the done screen returns to the landing page.
 7. No JavaScript or console errors.
 
 ## Not yet verified

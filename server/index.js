@@ -20,6 +20,8 @@ const { JsonStore } = require('./store.js');
 const auth = require('./auth.js');
 
 const ROOT = path.join(__dirname, '..');
+const ASSETS = path.join(ROOT, 'assets');
+const ASSET_TYPES = { '.png': 'image/png', '.svg': 'image/svg+xml', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.ico': 'image/x-icon', '.woff2': 'font/woff2', '.woff': 'font/woff' };
 const COOKIE = 'club_session';
 const PUBLIC_COMMANDS = new Set(['creator.apply']);
 
@@ -113,6 +115,15 @@ function createApp(options = {}) {
       return res.end(fs.readFileSync(indexFile));
     }
 
+    if (req.method === 'GET' && url.pathname.startsWith('/assets/')) {
+      // Brand assets (logo, self-hosted fonts). Only known binary types, never outside assets/.
+      const file = path.resolve(ASSETS, '.' + url.pathname.slice('/assets'.length));
+      const type = ASSET_TYPES[path.extname(file).toLowerCase()];
+      if (!type || !file.startsWith(ASSETS + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) { res.writeHead(404, { 'content-type': 'text/plain' }); return res.end('Not found'); }
+      res.writeHead(200, { 'content-type': type, 'cache-control': 'public, max-age=86400' });
+      return res.end(fs.readFileSync(file));
+    }
+
     if (req.method === 'GET' && url.pathname === '/auth/callback') {
       const email = auth.redeem(url.searchParams.get('token'), store);
       const identity = email && auth.identify(email, state, cfg);
@@ -128,7 +139,7 @@ function createApp(options = {}) {
     const session = sessionOf(req);
 
     if (req.method === 'GET' && url.pathname === '/api/session') {
-      return json(res, 200, { mode: 'remote', authenticated: !!session, role: session?.role || null, email: session?.email || null, creatorId: session?.creatorId || null, name: session?.name || null, mailMode: cfg.mailMode, revision: state.revision });
+      return json(res, 200, { mode: 'remote', authenticated: !!session, role: session?.role || null, email: session?.email || null, creatorId: session?.creatorId || null, name: session?.name || null, mailMode: cfg.mailMode, revision: state.revision, logo: fs.existsSync(path.join(ASSETS, 'logo.png')) });
     }
 
     if (req.method === 'POST' && url.pathname === '/api/auth/request') {

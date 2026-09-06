@@ -118,6 +118,13 @@ ILS and USD are never summed together.
 - Mail delivery: `dev` writes the link to `data/outbox` and returns it to the UI; `webhook` POSTs `{from,to,subject,text}` to a configured URL. SMTP is deliberately not implemented; any relay with an HTTP endpoint works.
 - Hardening in place: same-origin check on POST, 256 KB body limit (413), per-IP rate limit on link requests, no e-mail enumeration (identical answers), constant-time cookie verification, `nosniff` and `no-referrer` headers, refusal to start on a corrupt state file.
 
+### 6c. Public landing page (v0.3.1)
+
+- In connected mode a signed-out visitor lands on `renderLanding()` (`app/36-landing.js`), not on the sign-in form. Sign-in is one tap away (header, hero, footer) and is its own screen (`app/37-login.js`); `?auth=invalid` opens it directly.
+- Structure follows a single decision path: promise (hero) → proof strip → how it works → the two tracks → what the product is / what we never ask → objections (FAQ) → final call. Every number on the page is backed by a rule in `core.js` (20% pool, 10/10 split, two markets, human approval); there are no invented testimonials or follower counts.
+- Copy principles: second person, presuppositions about the creator's existing audience, low-commitment first step ("2 minutes", "no cost, no commitment, no script"), explicit autonomy ("your voice, your pace", "you can change later"), and objections answered before the call to action.
+- Brand assets: `assets/logo.png` (optional) is served at `/assets/logo.png`, inlined by `build.py`, and probed only when `/api/session` reports it exists; otherwise an SVG wordmark is drawn. Heebo is self-hosted under `assets/fonts/` and loaded only over HTTP, so the offline file never makes a request.
+
 ## 7. Security posture of the prototype
 
 - Self-contained HTML with a strict CSP (`default-src 'none'`, no network, no external fonts/scripts).
@@ -135,7 +142,7 @@ ILS and USD are never summed together.
 7. Contract / rights agreement e-signature.
 8. AI brief generation (the "brief builder" currently inserts the default brief).
 9. Analytics on content performance.
-10. Real logo and brand font assets.
+10. ~~Real logo and brand font assets~~ (font self-hosted; the logo file slots into `assets/logo.png`, see README).
 
 ## 9. Suggested roadmap
 
@@ -143,5 +150,6 @@ ILS and USD are never summed together.
 |-------|------|
 | 0.2 ✅ | Split `app.js` into view modules; creator rejection; mission editing/archiving; unit tests for UI helpers (`format.js`) |
 | 0.3 ✅ | Dependency-free Node server with the same command/dispatch model, JSON store behind a swappable interface, magic-link sign-in, role-scoped state |
+| 0.3.1 ✅ | Public landing page, redesigned sign-in, brand assets (logo slot + self-hosted font), Railway deployment |
 | 0.4 | Postgres store + hosted deployment; notification e-mails (offer, feedback, approval); file upload for drafts; contract acceptance record |
 | 0.5 | Instagram/TikTok API metric checks; payout provider integration |

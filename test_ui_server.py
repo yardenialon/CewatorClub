@@ -64,9 +64,14 @@ class ConnectedMode(unittest.TestCase):
         page.on("dialog", lambda d: d.accept("Demo cancellation"))
         return page
 
-    def sign_in(self, page, email):
+    def open_login(self, page):
         page.goto(self.base + "/")
+        page.locator(".ld-hero").wait_for()  # public landing page first
+        page.locator('.pub-nav [data-action="mode"][data-view="login"]').click()
         page.locator("#login-form").wait_for()
+
+    def sign_in(self, page, email):
+        self.open_login(page)
         page.fill('#login-form input[name="email"]', email)
         page.locator('#login-form button[type="submit"]').click()
         page.locator("#dev-link").wait_for()
@@ -78,12 +83,21 @@ class ConnectedMode(unittest.TestCase):
         return json.loads((Path(self.data_dir) / "state.json").read_text())
 
     # tests ---------------------------------------------------------------
-    def test_01_anonymous_visitor_sees_login_not_demo(self):
+    def test_01_anonymous_visitor_sees_landing_not_demo(self):
         page = self.new_page()
         page.goto(self.base + "/")
-        page.locator("#login-form").wait_for()
+        page.locator(".ld-hero").wait_for()
         self.assertEqual(page.locator(".mode-switch").count(), 0)
         self.assertEqual(page.locator("#creator-picker").count(), 0)
+        self.assertEqual(page.locator("#login-form").count(), 0)  # sign-in is one tap away, not the first screen
+        page.locator(".faq-q").first.click()
+        self.assertEqual(page.locator(".faq-item.open").count(), 1)
+        page.locator(".ld-hero [data-action=\"apply\"]").click()
+        page.locator('.wizard-card[data-step="intro"]').wait_for()
+        page.locator('.wizard [data-action="mode"][data-view="login"]').click()
+        page.locator("#login-form").wait_for()
+        page.locator('[data-action="mode"][data-view="landing"]').first.click()
+        page.locator(".ld-hero").wait_for()
         page.close()
 
     def test_02_invalid_link_shows_error(self):
@@ -129,11 +143,12 @@ class ConnectedMode(unittest.TestCase):
         self.assertEqual(a2["status"], "accepted")
         page.close()
 
-    def test_05_logout_returns_to_login(self):
+    def test_05_logout_returns_to_the_public_page(self):
         page = self.new_page()
         self.sign_in(page, MAYA)
         page.locator('[data-action="logout"]').click()
-        page.locator("#login-form").wait_for()
+        page.locator(".ld-hero").wait_for()
+        self.assertEqual(page.locator('[data-action="logout"]').count(), 0)
         page.close()
 
     def test_06_public_application_works_without_signing_in(self):
@@ -158,7 +173,7 @@ class ConnectedMode(unittest.TestCase):
         self.assertEqual(c["url"], "https://youtube.com/@connected")
         self.assertEqual(c["engagement"], 2)  # "not sure" maps to the middle tier until the admin verifies
         page.locator("#wiz-done").click()
-        page.locator("#login-form").wait_for()
+        page.locator(".ld-hero").wait_for()
         page.close()
 
     def test_99_no_javascript_errors(self):

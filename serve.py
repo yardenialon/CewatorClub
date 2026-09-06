@@ -7,6 +7,7 @@
 Binds to 127.0.0.1 only. Data is still stored in the browser, not on this server.
 Do not expose it to the internet.
 """
+import json
 import sys
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -21,7 +22,7 @@ class Handler(SimpleHTTPRequestHandler):
         # The page asks whether a club server is behind it. This one is static: answer "local"
         # so the prototype keeps using browser storage (and the console stays clean).
         if self.path.split("?")[0] == "/api/session":
-            body = b'{"mode":"local"}'
+            body = json.dumps({"mode": "local", "logo": (ROOT / "assets" / "logo.png").is_file()}).encode()
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
