@@ -288,6 +288,8 @@ Board 2 (5s, ~0.6s per cut): 1 static macro, finger already pressing the button 
 
 ## 7. נעילת מוצר מדויקת — SimpliiGood Spirulina (גובר על כל מה שלמעלה)
 
+**מרכיבי השייק:** כוס חלב שקדים (בכוס מדידה שקופה, בלי קרטון ממותג), חתיכות בננה קפואה, 2 קוביות, עלי תרד, תמר מגולען. השייק המוכן: ירוק ספירולינה כהה, קרמי, חלק, בלי גושים וסיבים (ראו SMOOTHIE LOOK LOCK בבריף).
+
 **מה המוצר באמת:** שקית עמידה צהובה (lemon-yellow → לבן בתחתית), מאט, זיפ עליון, ~18×12 ס"מ. בפנים בליסטר שקוף, 2 שורות × 5 תאים, קובייה בכל תא. **הקובייה:** בלוק מלבני 3.2×2.5×1.9 ס"מ, פינות מעוגלות, גג מעט קמור וצר מהבסיס, ירוק-כחול כהה כמעט שחור, אטום, מרקם גרגירי עדין עם כפור לבן.
 
 **רפרנסים להעלאה (חתוכים ונפרדים, לא דף המפרט):** 1. תקריב קובייה בלבד (ראשון ברשימה), 2. חזית השקית, 3. זווית 3/4, 4. inside view עם הבליסטר.
@@ -300,7 +302,7 @@ Board 2 (5s, ~0.6s per cut): 1 static macro, finger already pressing the button 
 `["Smoothie booster, ready to blend!", "Good source of iron", "Complete plant protein", "Blend 2 cubes into your favorite smoothie", "Non-GMO Project Verified", "Gluten Free", "Vegan", "Kosher"]`
 
 **תסריט מעודכן:**
-- Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+- Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Almond milk, frozen banana, two of these cubes, a handful of spinach, one pitted date."
 - Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, WEGMANS."
 
 **נעילת השם Wegmans:** השם נאמר בבירור בשני הלוחות, מודגש באותיות גדולות בשורת התסריט (עד שתי מילים מודגשות בשורה), עם הנחיית הגייה WEG-munz מחוץ למרכאות. כתיב פונטי בתוך הציטוט אסור כי הוא שובר סנכרון שפתיים.
@@ -314,14 +316,16 @@ Creator: use my attached avatar image as the creator reference (I am authorized 
 
 Product (I own this brand — SimpliiGood Spirulina, distributed by AlgaeCore). Attached references: (1) single cube close-up, (2) pouch front view, (3) pouch 3/4 view, (4) inside view with the blister tray. Angle-lock the product to these references only. PRODUCT LOCK — reuse verbatim in every board and clip: [PRODUCT LOCK text above]
 
-Props: a plain unbranded countertop blender with a clear jar (no logo, no display text), a small bowl of frozen banana chunks, a handful of fresh spinach leaves, one pitted date, one plain clear glass. No legible text on anything except the product's own printed label. No Wegmans logo or any real brand logo other than my own product on screen — the store name is spoken only.
+Props: a plain unbranded countertop blender with a clear jar (no logo, no display text), one plain clear glass measuring cup filled with almond milk (no carton, no brand on screen), a small bowl of frozen banana chunks, a handful of fresh spinach leaves, one pitted date, one plain clear drinking glass. No legible text on anything except the product's own printed label.
+
+SMOOTHIE LOOK LOCK (every frame after blending): the finished smoothie is a deep, dark spirulina green — rich forest green with a slight blue undertone, one uniform opaque color from top to bottom; thick, creamy, silky-smooth and softly glossy like a milkshake, pours in a slow heavy ribbon and coats the inside of the glass; the surface settles flat and velvety with maybe a few tiny bubbles at the rim. No chunks, no visible spinach fibers or leaf flecks, no dark specks, no separation, no foam cap, no watery thin juice, no bright neon or lime green, no brown, khaki or gray tint. It must look delicious and drinkable, like a café green smoothie. No Wegmans logo or any real brand logo other than my own product on screen — the store name is spoken only.
 
 Scenario (director mode, use exactly these beats, shot as an authentic selfie video with hard cuts between selfie and propped-phone static shots, in a daylight home kitchen):
-Board 1 (15s) — she is caught mid-motion setting the yellow pouch down next to the blender, shows the front of the pouch to camera at real size, pulls the zip open and slides the clear tray partly out so the dark green cubes are visible in their cells, then builds the smoothie in the blender jar one ingredient per cut: frozen banana chunks in, TWO cubes pushed out of the tray into the jar (static camera, both hands: one holds the tray, the other thumb pops the cubes), a handful of spinach in, one pitted date in, and she snaps the blender lid on.
-Board 2 (5s) — she presses the blender button, the jar swirls to deep green, she pours into the glass, and the closing beat is her taking a real sip and lowering the glass with a small satisfied grin beside the pouch — no voice during the sip.
+Board 1 (15s) — she is caught mid-motion setting the yellow pouch down next to the blender, shows the front of the pouch to camera at real size, pulls the zip open and slides the clear tray partly out so the dark green cubes are visible in their cells, then builds the smoothie in the blender jar one ingredient per cut: a cup of almond milk poured in first, frozen banana chunks in, TWO cubes pushed out of the tray into the jar (static camera, both hands: one holds the tray, the other thumb pops the cubes), a handful of spinach in, one pitted date in and the blender lid snapped on.
+Board 2 (5s) — she presses the blender button, the jar swirls to deep green, she pours a thick smooth ribbon into the glass, and the closing beat is her taking a real sip and lowering the glass with a small satisfied grin beside the pouch — no voice during the sip.
 
 Script (use verbatim, first word lands within 0.4s of frame one):
-Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Almond milk, frozen banana, two of these cubes, a handful of spinach, one pitted date."
 Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, WEGMANS."
 
 Store name lock: the word "Wegmans" is spoken clearly and audibly in BOTH boards exactly as written, pronounced WEG-munz (first syllable stressed, rhymes with "leg"), with a slight emphasis and a clear mouth shape on it. Never drop it, never mumble it, never replace it with "the store", "the supermarket", "the grocery store", or any other store name. Keep the spoken name only — no Wegmans logo, sign, or bag branding on screen.
