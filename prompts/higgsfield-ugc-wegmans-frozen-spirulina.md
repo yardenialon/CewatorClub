@@ -238,3 +238,46 @@ Facial features clear and undistorted, consistent clothing throughout. Shot on i
 
 - **Hook B (Mid-Sentence Confession):** "—the frozen aisle at Wegmans, bottom shelf, I almost walked past it. Fresh spirulina. Frozen, not powder. And inside, a tray of little frozen portions."
 - **Hook C (Freeze-Reaction, H4):** קאט 1 נפתח על הפנים שלה כבר בתגובה, מבט נעול על הקופסה, 0.6 שניות שקט, ואז: "Fresh spirulina. In the freezer. At Wegmans. And inside, a tray of little frozen portions."
+
+---
+
+## 6. גרסה 2 — שייק ירוק בבלנדר (20 שניות, 15 + 5)
+
+היא מכינה בבלנדר שייק ירוק עם חתיכות בננה קפואה, שתי קוביות ספירולינה מלבניות (כמו במגשית), עלי תרד ותמר מגולען, ושותה בסוף.
+
+**תסריט (41 מילים):**
+
+- Board 1 (15s): "Guess what came home from Wegmans with me— fresh spirulina, frozen. Straight from the freezer aisle. Frozen banana, two of these little green blocks, a handful of spinach, one pitted date."
+- Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans." (הלגימה בסוף בלי דיבור.)
+
+**בריף להדבקה ב-Higgsfield:**
+
+```
+Make a 20-second UGC-style talking-head video (9:16) using the ugc-review-video workflow — two boards, 15s + 5s.
+
+Creator: use my attached avatar image as the creator reference (I am authorized to use it). She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. NATURAL register, English, American accent. No music.
+
+Product: attached — a frozen-food carton of fresh frozen spirulina (front of box, second angle of box, the inner tray, and the finished green smoothie). The spirulina portions are small rectangular deep-green frozen blocks exactly as in the tray photo — keep that rectangular block shape, never round cubes or powder. Angle-lock the product to these references only. Render the carton at real palm size, never enlarged; exactly one carton in every frame; exactly two spirulina blocks leave the tray in the whole video.
+
+Props: a plain unbranded countertop blender with a clear jar (no logo, no display text), a small bowl of frozen banana chunks, a handful of fresh spinach leaves, one pitted date, one plain clear glass. No legible text on anything except the product's own label. No Wegmans logo or any real brand logo on screen — the store name is spoken only.
+
+Scenario (director mode, use exactly these beats, shot as an authentic selfie video with hard cuts between selfie and propped-phone static shots, in a daylight home kitchen):
+Board 1 (15s) — she is caught mid-motion setting the spirulina carton down next to the blender, shows the front of the box, opens the lid and shows the tray of rectangular green blocks, then builds the smoothie in the blender jar one ingredient per cut: frozen banana chunks in, TWO rectangular spirulina blocks in (both hands: one holds the tray, the other pushes the blocks out), a handful of spinach in, one pitted date in, and she snaps the blender lid on.
+Board 2 (5s) — she presses the blender button, the jar swirls to deep green, she pours into the glass, and the closing beat is her taking a real sip and lowering the glass with a small satisfied grin — no voice during the sip.
+
+Script (use verbatim, first word lands within 0.4s of frame one):
+Board 1 (15s): "Guess what came home from Wegmans with me— fresh spirulina, frozen. Straight from the freezer aisle. Frozen banana, two of these little green blocks, a handful of spinach, one pitted date."
+Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans."
+
+approved_claims: [] (no health, taste, nutrition, or comparative claims — observable mechanics and colors only; the sip is shown, never described)
+Real iPhone look: deep focus, natural window light, pore-level skin, no beauty filter, no cinematic grade, no slow motion, no on-screen text.
+Text on video: none. Post package: yes, with #ad disclosure.
+```
+
+**חלוקת הסלוטים המומלצת (אם בונים את הלוחות ידנית):**
+
+Board 1: 1 selfie MCU, carton mid-set-down beside the blender · 2 selfie tight, box front to lens · 3 static macro, lid opening, tray of rectangular blocks · 4 static wide, banana chunks into the jar · 5 static macro, two blocks pushed out of the tray into the jar (left hand tray, right thumb) · 6 static medium-close, spinach in · 7 selfie medium, date held up then dropped in · 8 static medium-close, both hands snapping the lid on.
+
+Board 2 (5s, ~0.6s per cut): 1 static macro, finger already pressing the button · 2 static macro, jar swirling to green · 3 selfie MCU, eyebrows up at the jar · 4 static medium-close, pouring into the glass · 5 static macro, green surface settling · 6 selfie MCU, glass raised to lips · 7 selfie tight, real sip, lips on the glass, no voice · 8 static medium, glass lowered beside the carton, small satisfied grin, loop-ready.
+
+**הערה:** "healthy" לא נאמר בקול. בלי `approved_claims` ה-workflow חוסם טענות בריאות. אם יש ניסוח מאושר, הכניסו אותו מילה במילה.
