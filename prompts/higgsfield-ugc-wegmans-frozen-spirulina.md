@@ -300,8 +300,10 @@ Board 2 (5s, ~0.6s per cut): 1 static macro, finger already pressing the button 
 `["Smoothie booster, ready to blend!", "Good source of iron", "Complete plant protein", "Blend 2 cubes into your favorite smoothie", "Non-GMO Project Verified", "Gluten Free", "Vegan", "Kosher"]`
 
 **תסריט מעודכן:**
-- Board 1 (15s): "Guess what came home from Wegmans with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
-- Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans."
+- Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+- Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, WEGMANS."
+
+**נעילת השם Wegmans:** השם נאמר בבירור בשני הלוחות, מודגש באותיות גדולות בשורת התסריט (עד שתי מילים מודגשות בשורה), עם הנחיית הגייה WEG-munz מחוץ למרכאות. כתיב פונטי בתוך הציטוט אסור כי הוא שובר סנכרון שפתיים.
 
 **בריף להדבקה ב-Higgsfield (גרסת בלנדר, 20 שניות, מוצר מדויק):**
 
@@ -319,8 +321,10 @@ Board 1 (15s) — she is caught mid-motion setting the yellow pouch down next to
 Board 2 (5s) — she presses the blender button, the jar swirls to deep green, she pours into the glass, and the closing beat is her taking a real sip and lowering the glass with a small satisfied grin beside the pouch — no voice during the sip.
 
 Script (use verbatim, first word lands within 0.4s of frame one):
-Board 1 (15s): "Guess what came home from Wegmans with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
-Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans."
+Board 1 (15s): "Guess what came home from WEGMANS with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, WEGMANS."
+
+Store name lock: the word "Wegmans" is spoken clearly and audibly in BOTH boards exactly as written, pronounced WEG-munz (first syllable stressed, rhymes with "leg"), with a slight emphasis and a clear mouth shape on it. Never drop it, never mumble it, never replace it with "the store", "the supermarket", "the grocery store", or any other store name. Keep the spoken name only — no Wegmans logo, sign, or bag branding on screen.
 
 approved_claims (exact strings printed on my packaging, use only these, verbatim, if any claim is spoken): ["Smoothie booster, ready to blend!", "Good source of iron", "Complete plant protein", "Blend 2 cubes into your favorite smoothie", "Non-GMO Project Verified", "Gluten Free", "Vegan", "Kosher"]
 Real iPhone look: deep focus, natural window light, pore-level skin, no beauty filter, no cinematic grade, no slow motion, no on-screen text.
