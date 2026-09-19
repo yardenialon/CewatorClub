@@ -1,5 +1,7 @@
 # Higgsfield UGC — "חזרתי מווגמנס" · ספירולינה טרייה בהקפאה
 
+> **עדכון חשוב (סעיף 7):** המוצר הוא שקית עמידה צהובה של SimpliiGood עם בליסטר של 10 קוביות, לא קופסת קרטון. סעיף 7 מכיל את נעילת המוצר המדויקת ואת הבריף המעודכן, והוא גובר על תיאורי "carton / flip-top lid" בסעיפים 1–6.
+
 חבילת פרומפטים מוכנה ל-Higgsfield, בנויה לפי ה-workflow הרשמי `ugc-review-video`
 (סטוריבורד 8 סלוטים ב-GPT Image 2 → ניקוי "AI-slop" ב-Seedream → קליפ עם דיבור מובנה ב-Seedance 2.5).
 
@@ -281,3 +283,48 @@ Board 1: 1 selfie MCU, carton mid-set-down beside the blender · 2 selfie tight,
 Board 2 (5s, ~0.6s per cut): 1 static macro, finger already pressing the button · 2 static macro, jar swirling to green · 3 selfie MCU, eyebrows up at the jar · 4 static medium-close, pouring into the glass · 5 static macro, green surface settling · 6 selfie MCU, glass raised to lips · 7 selfie tight, real sip, lips on the glass, no voice · 8 static medium, glass lowered beside the carton, small satisfied grin, loop-ready.
 
 **הערה:** "healthy" לא נאמר בקול. בלי `approved_claims` ה-workflow חוסם טענות בריאות. אם יש ניסוח מאושר, הכניסו אותו מילה במילה.
+
+---
+
+## 7. נעילת מוצר מדויקת — SimpliiGood Spirulina (גובר על כל מה שלמעלה)
+
+**מה המוצר באמת:** שקית עמידה צהובה (lemon-yellow → לבן בתחתית), מאט, זיפ עליון, ~18×12 ס"מ. בפנים בליסטר שקוף, 2 שורות × 5 תאים, קובייה בכל תא. **הקובייה:** בלוק מלבני 3.2×2.5×1.9 ס"מ, פינות מעוגלות, גג מעט קמור וצר מהבסיס, ירוק-כחול כהה כמעט שחור, אטום, מרקם גרגירי עדין עם כפור לבן.
+
+**רפרנסים להעלאה (חתוכים ונפרדים, לא דף המפרט):** 1. תקריב קובייה בלבד (ראשון ברשימה), 2. חזית השקית, 3. זווית 3/4, 4. inside view עם הבליסטר.
+
+**PRODUCT LOCK (להעתקה מילה במילה לכל לוח וקליפ):**
+
+> a stand-up resealable pouch, bright lemon-yellow fading to white at the bottom, matte finish, zip seal along the top, roughly 18 cm tall and 12 cm wide, fits in one hand; front panel carries the SimpliiGood SPIRULINA wordmark in dark green and a flat illustrated smoothie-glass graphic exactly as in the reference, keep the label text exactly as printed, never gibberish, never a different brand. Inside the pouch sits ONE clear plastic blister tray with ten individual cells in two rows of five, one cube per cell. THE CUBE: a small rectangular block with softly rounded edges and a slightly tapered, gently domed top — the top face is a little smaller than the base — 3.2 cm long, 2.5 cm wide, 1.9 cm tall, sits on a fingertip pad; very dark blue-green, almost black-green, fully opaque, with a matte, finely granular surface and fine white frost crystals in the surface texture. Never a translucent ice cube, never neon or bright green, never round, never a sphere, never a powder, never a smooth glossy gel block. The cube shape and color must match the close-up reference exactly in every frame it appears. Exactly one pouch in every frame; exactly two cubes leave the tray in the whole video; exactly one tray.
+
+**approved_claims (מודפסות על האריזה, מילה במילה):**
+`["Smoothie booster, ready to blend!", "Good source of iron", "Complete plant protein", "Blend 2 cubes into your favorite smoothie", "Non-GMO Project Verified", "Gluten Free", "Vegan", "Kosher"]`
+
+**תסריט מעודכן:**
+- Board 1 (15s): "Guess what came home from Wegmans with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+- Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans."
+
+**בריף להדבקה ב-Higgsfield (גרסת בלנדר, 20 שניות, מוצר מדויק):**
+
+```
+Make a 20-second UGC-style talking-head video (9:16) using the ugc-review-video workflow — two boards, 15s + 5s.
+
+Creator: use my attached avatar image as the creator reference (I am authorized to use it). She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. NATURAL register, English, American accent. No music.
+
+Product (I own this brand — SimpliiGood Spirulina, distributed by AlgaeCore). Attached references: (1) single cube close-up, (2) pouch front view, (3) pouch 3/4 view, (4) inside view with the blister tray. Angle-lock the product to these references only. PRODUCT LOCK — reuse verbatim in every board and clip: [PRODUCT LOCK text above]
+
+Props: a plain unbranded countertop blender with a clear jar (no logo, no display text), a small bowl of frozen banana chunks, a handful of fresh spinach leaves, one pitted date, one plain clear glass. No legible text on anything except the product's own printed label. No Wegmans logo or any real brand logo other than my own product on screen — the store name is spoken only.
+
+Scenario (director mode, use exactly these beats, shot as an authentic selfie video with hard cuts between selfie and propped-phone static shots, in a daylight home kitchen):
+Board 1 (15s) — she is caught mid-motion setting the yellow pouch down next to the blender, shows the front of the pouch to camera at real size, pulls the zip open and slides the clear tray partly out so the dark green cubes are visible in their cells, then builds the smoothie in the blender jar one ingredient per cut: frozen banana chunks in, TWO cubes pushed out of the tray into the jar (static camera, both hands: one holds the tray, the other thumb pops the cubes), a handful of spinach in, one pitted date in, and she snaps the blender lid on.
+Board 2 (5s) — she presses the blender button, the jar swirls to deep green, she pours into the glass, and the closing beat is her taking a real sip and lowering the glass with a small satisfied grin beside the pouch — no voice during the sip.
+
+Script (use verbatim, first word lands within 0.4s of frame one):
+Board 1 (15s): "Guess what came home from Wegmans with me— SimpliiGood frozen spirulina cubes. Straight from the freezer aisle. Frozen banana, two of these cubes, a handful of spinach, one pitted date."
+Board 2 (5s): "—blend it, and look at that GREEN. Freezer aisle, Wegmans."
+
+approved_claims (exact strings printed on my packaging, use only these, verbatim, if any claim is spoken): ["Smoothie booster, ready to blend!", "Good source of iron", "Complete plant protein", "Blend 2 cubes into your favorite smoothie", "Non-GMO Project Verified", "Gluten Free", "Vegan", "Kosher"]
+Real iPhone look: deep focus, natural window light, pore-level skin, no beauty filter, no cinematic grade, no slow motion, no on-screen text.
+Text on video: none. Post package: yes, with #ad disclosure.
+```
+
+**QA לקובייה:** אם בפריים כלשהו הקובייה שקופה, בהירה או עגולה, להריץ מחדש רק את הקליפ הזה עם התוספת "the cube is a dark opaque frosted block exactly like reference image 1".
