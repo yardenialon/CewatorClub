@@ -336,3 +336,46 @@ Text on video: none. Post package: yes, with #ad disclosure.
 ```
 
 **QA לקובייה:** אם בפריים כלשהו הקובייה שקופה, בהירה או עגולה, להריץ מחדש רק את הקליפ הזה עם התוספת "the cube is a dark opaque frosted block exactly like reference image 1".
+
+---
+
+## 8. גרסה 3 — סרטון מתכון: סמודי בול ספירולינה (30 שניות, 15 + 15, לא שיווקי)
+
+**הרעיון:** היא מלמדת איך מכינים סמודי בול עם ספירולינה טרייה קפואה (לא אבקה). אין CTA, אין שם חנות, אין שם מותג בקול. השקית עומדת על השיש עם התווית למצלמה ולא מוצגת. השורה האחרונה משאירה לופ פתוח כדי שהצופים ישאלו איפה קונים.
+
+**מרכיבים:** כוס חלב שקדים, בננה קפואה, תרד, תמר מגולען, 2 קוביות ספירולינה. **קישוט:** תותים פרוסים בשורה, אוכמניות, קוקוס קלוי, זרעי צ'יה, פרחי אמנון ותמר קטנים.
+
+**תסריט (59 מילים):**
+- Board 1 (15s): "Spirulina smoothie bowl, but with the frozen kind, not the powder. Almond milk, frozen banana, spinach, one pitted date, and two of these frozen spirulina cubes. Blend until it's thick."
+- Board 2 (15s): "—into the bowl, smooth it flat. Sliced strawberries in a row, blueberries, toasted coconut, chia seeds, and a couple of little pansies. And that green? That's just the spirulina."
+
+**בריף להדבקה ב-Higgsfield:**
+
+```
+Make a 30-second UGC-style recipe video (9:16) using the ugc-review-video workflow — two boards, 15s + 15s. This is a calm how-to recipe video, NOT an ad: no call to action, no store name, no brand name spoken, no "go get it". The creator simply teaches how to make a spirulina smoothie bowl with frozen spirulina cubes instead of powder.
+
+Creator: use my attached avatar image as the creator reference (I am authorized to use it). She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. NATURAL register, unhurried teaching tone like talking a friend through a recipe, English, American accent. No music.
+
+Product (I own this brand — SimpliiGood Spirulina). Attached references: (1) single cube close-up, (2) pouch front view, (3) pouch 3/4 view, (4) inside view with the blister tray. Angle-lock the product to these references only. The pouch is never pitched: it just sits on the counter with its front label facing camera, at real size, and the cubes come out of it like any other ingredient. PRODUCT LOCK — reuse verbatim in every board and clip: [PRODUCT LOCK text from section 7]
+
+SMOOTHIE BOWL LOOK LOCK (every frame after blending): a thick, spoonable, soft-serve-like smoothie base — deep, dark spirulina green, rich forest green with a slight blue undertone, one uniform opaque color, silky-smooth and matte-creamy, holds its shape when smoothed flat in a plain white ceramic bowl. No chunks, no visible spinach fibers or leaf flecks, no dark specks, no separation, no foam, no watery or thin texture, no bright neon or lime green, no brown, khaki or gray tint. It must look like a beautiful café smoothie bowl.
+
+Props: a plain unbranded countertop blender with a clear jar (no logo, no display text), one plain clear glass measuring cup of almond milk (no carton, no brand), a small bowl of frozen banana chunks, a handful of fresh spinach leaves, one pitted date, one plain white ceramic bowl, a plain spoon, and small prep bowls of toppings: fresh strawberries and a small knife on a wooden board, blueberries, toasted coconut flakes, chia seeds, and a few tiny edible pansy flowers (purple and yellow). No legible text on anything except the product's own printed label. No real brand logos anywhere.
+
+Scenario (director mode, use exactly these beats, authentic selfie video with hard cuts between selfie and propped-phone static shots, mostly overhead and counter-level static shots of her hands, with a few selfie cuts so she stays present, in a daylight home kitchen):
+Board 1 (15s) — frame one is her thumb already popping a dark green cube out of the tray (mechanism-first hook), then she builds the base in the blender one ingredient per cut: almond milk poured in first, frozen banana chunks, spinach, one pitted date, the two cubes dropped in, lid on and blender running, the jar turning a deep dark green, and a thick smooth base being scooped out of the jar with a spatula. The pouch stands on the counter in the background with the label facing camera, never held up to the lens, never presented.
+Board 2 (15s) — the base is smoothed flat in the white bowl, then she decorates one topping per cut with slow, careful hands: strawberries sliced thin on the board and laid in a neat overlapping row across one side, a small cluster of blueberries, a pinch of toasted coconut, a sprinkle of chia seeds, and two or three tiny pansy flowers placed last with fingertips. Closing beat: an overhead of the finished bowl, her spoon dipping in once and lifting a clean scoop, then a short selfie cut of her taking the bite with a small closed-mouth smile — no voice during the bite — and a final loop-ready overhead of the bowl with the pouch just visible at the edge of frame.
+
+Script (use verbatim, first word lands within 0.4s of frame one):
+Board 1 (15s): "Spirulina smoothie bowl, but with the frozen kind, not the powder. Almond milk, frozen banana, spinach, one pitted date, and two of these frozen spirulina cubes. Blend until it's thick."
+Board 2 (15s): "—into the bowl, smooth it flat. Sliced strawberries in a row, blueberries, toasted coconut, chia seeds, and a couple of little pansies. And that green? That's just the spirulina."
+
+approved_claims: [] (no health, nutrition, taste, or comparative claims; observable mechanics and colors only)
+Real iPhone look: deep focus, natural window light, pore-level skin, no beauty filter, no cinematic grade, no slow motion, no on-screen text, no captions.
+Text on video: none. Post package: yes.
+```
+
+**חבילת פוסט (החנות רק בתגובות):**
+- Caption: "Frozen spirulina, not powder. Yes, it's a thing. 🟢 made with our SimpliiGood cubes"
+- תשובה מוכנה ל-"where do you get it?": "Freezer aisle at Wegmans, next to the frozen fruit."
+- גילוי נאות חובה (האווטר שייך למותג): "made with our SimpliiGood cubes" או #ad בכיתוב.
