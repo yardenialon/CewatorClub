@@ -16,7 +16,7 @@
 | `product_box_angle2` | האריזה מזווית שנייה (צד / שלושת-רבעי) |
 | `product_tray` | המגשית עם קוביות הספירולינה הקפואות |
 | `product_dish` | המנה המוכנה |
-| משך | 30 שניות = 2 לוחות × 15 שניות (מומלץ ל-Reels / TikTok) |
+| משך | 20 שניות = 2 לוחות: 15 שניות + 5 שניות (Reels / TikTok) |
 | שפה | English, American accent, NATURAL register |
 
 **דברים שצריך לוודא מול התמונות שלכם ולתקן בפרומפט (מסומנים ב-`[VERIFY]`):**
@@ -30,17 +30,17 @@
 
 ---
 
-## 1. התסריט (60 מילים, שני מקטעים)
+## 1. התסריט (44 מילים, שני מקטעים)
 
 **Segment 1 — Board 1 (HOOK + SETUP, 0–15s):**
 
-> Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. Look how small this box is.
+> Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. And inside, a tray of little frozen portions.
 
-**Segment 2 — Board 2 (APPLY + CLOSER, 15–30s):**
+**Segment 2 — Board 2 (APPLY + CLOSER, 15–20s):**
 
-> —and inside it's a tray, little frozen portions. One pops right out, straight into the bowl, and it goes this deep GREEN. That's it. Freezer aisle, Wegmans. Go look.
+> —one pops right out, into the bowl, deep GREEN. Freezer aisle, Wegmans.
 
-(אם יש טענה מאושרת: החליפו את "That's it." ב-`[APPROVED CLAIM]`, מילה במילה.)
+(אם יש טענה מאושרת: הוסיפו `[APPROVED CLAIM]` מילה במילה במקום "deep GREEN" בלבד, כדי לא לחרוג מתקציב 5 השניות.)
 
 **Persona sentence (מועתק מילה במילה לכל פרומפט):**
 
@@ -55,17 +55,17 @@
 ## 2. אופציה A — בריף קצר להדביק לצ'אט של Higgsfield (ה-workflow בונה הכל לבד)
 
 ```
-Make a 30-second UGC-style talking-head video (9:16) using the ugc-review-video workflow.
+Make a 20-second UGC-style talking-head video (9:16) using the ugc-review-video workflow — two boards, 15s + 5s.
 
 Creator: use my attached avatar image as the creator reference (I am authorized to use it). She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. NATURAL register, English, American accent. No music.
 
 Product: attached — a frozen-food carton of fresh frozen spirulina (front of box, second angle of box, the inner tray of frozen portions, and the finished dish). Angle-lock the product to these four references only.
 
-Scenario (director mode, use exactly these beats): she is unpacking a plain brown paper grocery bag on a daylight kitchen counter, pulls out the box, shows the front, opens the lid, reveals the tray of frozen portions, pops ONE portion out, drops it into a smoothie bowl, it turns deep green, shows the finished dish, and closes by telling viewers to look in the freezer aisle at Wegmans. The store name is spoken only — no Wegmans logo or any real brand logo on screen; the bag is a plain unbranded paper bag.
+Scenario (director mode, use exactly these beats, shot as an authentic selfie video with hard cuts between selfie and propped-phone static shots): Board 1 (15s) — she is caught mid-unpacking a plain brown paper grocery bag on a daylight kitchen counter, pulls out the box, shows the front, opens the lid, and reveals the tray of frozen portions. Board 2 (5s) — she pops ONE portion out, drops it into a smoothie bowl, it turns deep green, and the closing frame is the finished dish next to the box. The store name is spoken only — no Wegmans logo or any real brand logo on screen; the bag is a plain unbranded paper bag.
 
-Script (use verbatim, split 15s + 15s):
-Board 1: "Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. Look how small this box is."
-Board 2: "—and inside it's a tray, little frozen portions. One pops right out, straight into the bowl, and it goes this deep GREEN. That's it. Freezer aisle, Wegmans. Go look."
+Script (use verbatim, first word lands within 0.4s of frame one):
+Board 1 (15s): "Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. And inside, a tray of little frozen portions."
+Board 2 (5s): "—one pops right out, into the bowl, deep GREEN. Freezer aisle, Wegmans."
 
 approved_claims: [] (no health, taste, or comparative claims — observable mechanics only)
 Text on video: none. Post package: yes, with #ad disclosure.
@@ -123,7 +123,7 @@ KEEP EXACTLY the framing, composition, slot layout, camera distances, poses, sub
 
 (אם נכשל במודרציה: אותו פרומפט על `seedream_v5_lite`.)
 
-### 3.3 Board 2 — `gpt_image_2`, 21:9, 2k, quality high
+### 3.3 Board 2 (5-second clip) — `gpt_image_2`, 21:9, 2k, quality high
 
 `medias` בסדר הזה: `[product_box_front, product_box_angle2, product_tray, product_dish, character, clean_board_1]`
 
@@ -132,7 +132,7 @@ KEEP EXACTLY the framing, composition, slot layout, camera distances, poses, sub
 
 The product is a small rectangular frozen-food carton, palm-sized, fits entirely in one hand, approximately 12 cm wide and 9 cm tall, matte printed cardboard with the exact front label from @Image1, a flip-top lid hinged along the back edge; inside sits one clear plastic tray holding rows of small thumb-sized frozen deep-green spirulina portions; no window on the box, no shrink wrap; one honest imperfection: a faint frost line along the tray edge. Product is rendered at realistic real-world scale relative to the character's hand and body. The product is approximately 9 cm tall and fits naturally in the character's hand without enlargement. If the label is small in frame, the camera moves closer rather than scaling the product up. Cross-board continuity: the lid is already open from the previous board; the tray is now being handled.
 
-A single ultra-wide horizontal storyboard sheet composed of exactly EIGHT equal-size 9:16 vertical slots arranged in ONE HORIZONTAL ROW, separated by thin white gutters on a clean white background, total sheet aspect 21:9. Do NOT make two rows and do NOT make a grid — exactly eight panels in one row, never ten, never twelve. All eight slots are active photorealistic UGC iPhone-style stills that tell one continuous 15-second video clip as eight sequential beats — slot 1 is beat 1 (opening), slot 8 is beat 8 (closing). There are no placeholder slots. Each adjacent pair of slots is a DIFFERENT camera setup — a different POV (selfie vs static camera), a different distance band (tight/macro vs medium vs wide), and a different action — so every beat boundary reads as a crisp hard cut, never a morph.
+A single ultra-wide horizontal storyboard sheet composed of exactly EIGHT equal-size 9:16 vertical slots arranged in ONE HORIZONTAL ROW, separated by thin white gutters on a clean white background, total sheet aspect 21:9. Do NOT make two rows and do NOT make a grid — exactly eight panels in one row, never ten, never twelve. All eight slots are active photorealistic UGC iPhone-style stills that tell one continuous 5-second video clip as eight sequential beats — slot 1 is beat 1 (opening), slot 8 is beat 8 (closing). There are no placeholder slots. Each adjacent pair of slots is a DIFFERENT camera setup — a different POV (selfie vs static camera), a different distance band (tight/macro vs medium vs wide), and a different action — so every beat boundary reads as a crisp hard cut, never a morph.
 
 Setting and lighting in all eight slots: the same home kitchen as @Image6 — light wood counter, white tile backsplash, window to camera-left, even neutral daytime light; the plain brown paper bag now pushed to the back of the counter; a plain white ceramic bowl of thick pale smoothie base [VERIFY: match the dish in @Image4] sits on the counter; a plain metal spoon. Outfit identical to @Image6.
 
@@ -182,40 +182,40 @@ Cut 8 (13.5-15s) — MEDIUM CLOSE-UP SELFIE: she leans into the lens with the op
 
 Static Description: A real lived-in home kitchen with a light wood counter and white tile backsplash, one window to camera-left giving even neutral daylight, a plain unbranded brown paper grocery bag, a bunch of bananas and an unlabeled bag of frozen berries on the counter. Exactly one spirulina carton exists in the scene; the only box-shaped object in frame is the product.
 
-Audio: She speaks to camera with a clear, bright, articulate American voice, iPhone microphone audio with natural room tone. [*small bright laugh*] "Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. Look how small this box is."
+Audio: She speaks to camera with a clear, bright, articulate American voice, iPhone microphone audio with natural room tone. [*small bright laugh*] "Guess what came home from Wegmans with me. Freezer aisle, right by the frozen fruit— fresh spirulina. Not the powder, actual FRESH spirulina, frozen. And inside, a tray of little frozen portions."
 
 Facial features clear and undistorted, consistent clothing throughout. Shot on iPhone, natural lighting, social media aesthetic, handheld micro-shake during selfie cuts, locked-off frozen frame during static-camera cuts. No on-screen text, no subtitles, no captions, no watermarks, no legible text on any object except the product's own label, no store logo, no real brand logos anywhere, no phone visible in any frame, no cinematic grade, no film grain, no bokeh, no lens flare, no fisheye lens, no ultra-wide distortion, no slow motion, no beauty filter, no third arm, no extra hands, no duplicated limbs, no deformed hands, exactly one product in every frame.
 ```
 
-### 3.5 Clip 2 — `seedance_2_5`, 9:16, 1080p, 15s, `mode: omni_reference`, `generate_audio: true`
+### 3.5 Clip 2 — `seedance_2_5`, 9:16, 1080p, 5s, `mode: omni_reference`, `generate_audio: true`
 
 `medias`: `[clean_board_2, character, product_tray, product_dish]`
 
 ```
 Style & Mood: UGC iPhone aesthetic, even neutral daytime window light from camera-left in the same home kitchen, MIXED: starts STATIC locked-off, hard-cuts to SELFIE handheld, and alternates per cut, deep focus with the background sharp, 23mm-wide phone look with mild edge distortion, one small auto-exposure adjustment mid-clip on a selfie cut, mild HDR flattening, faint shadow noise, pore-level skin with no smoothing, real weight and contact shadows, social media vertical format.
 
-Narrative Summary: She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. APPLY + CLOSER, continuing the same take mid-thought: she pops one frozen portion out of the tray, drops it into a bowl, it melts into deep green, she shows the finished dish and points viewers to the freezer aisle, performed by a natural, engaged creator — genuine reactions, lively but human, never staged screaming energy.
+Narrative Summary: She is a sweet, warm, relatable creator with a clear, bright, articulate American voice and an easy-going attitude — speaks and moves exactly like that. APPLY + CLOSER in a fast 5-second burst, continuing the same take mid-thought: she pops one frozen portion out of the tray, drops it into a bowl, it melts into deep green, and the clip lands on the finished dish beside the box, performed by a natural, engaged creator — genuine reactions, lively but human, never staged screaming energy.
 
 Dynamic Description:
-Cut 1 (0-2s) — MACRO STATIC: locked-off frame opens with her right thumb already mid-push under one cell of the clear tray held in her left hand, a single deep-green frozen portion popping up out of it, frost crystals flicking off, her voice already running from frame one; no face in frame. Hard cut to.
-Cut 2 (2-4s) — MEDIUM CLOSE-UP SELFIE: she holds the one green portion up between her right thumb and index finger beside her cheek, left hand off-frame with the camera, the tray resting flat on the counter; eyebrows lift, a small "oh" on her mouth, she turns the portion once in her fingers, eyes on it. Hard cut to.
-Cut 3 (4-6s) — WIDER STATIC: locked-off frame of her upper body at the counter, she drops the single portion from her right hand into the white bowl of pale smoothie base, left hand steadying the rim, a soft plop, her gaze following it down, lips mid-word; the one open carton stands beside the bowl. Hard cut to.
-Cut 4 (6-7.5s) — MACRO STATIC: locked-off, inside the bowl the portion sinks and a deep-green streak spreads through the pale base as her right hand pulls the spoon through it once, left hand gripping the rim, window light raking across the surface, no face in frame. Hard cut to.
-Cut 5 (7.5-9.5s) — TIGHT CLOSE-UP SELFIE: her face only, lips pressed together in a closed-mouth grin with no voice for this beat, eyes cast down toward the counter then lifting to the lens, chin tucked, a small nod; left hand off-frame with the camera, right hand parked flat on the counter out of frame; no product in this frame. Hard cut to.
-Cut 6 (9.5-11.5s) — MEDIUM CLOSE-UP STATIC: locked-off, both her hands set the finished deep-green dish down on the counter, left hand cupping the bowl, right hand laying the spoon beside it, the single carton standing to the right with its front label toward camera, her face at the top edge looking down, a satisfied exhale. Hard cut to.
-Cut 7 (11.5-13.5s) — MEDIUM CLOSE-UP SELFIE: she raises the finished green bowl in her right hand toward the lens at chest height, left hand off-frame with the camera, a wide easy grin, head tilting, hair swinging, the carton visible behind her on the counter at real size. Hard cut to.
-Cut 8 (13.5-15s) — MEDIUM STATIC: locked-off loop-ready closing frame, the green bowl and the single carton side by side on the counter, front label toward camera; her right hand slides the carton a few centimeters toward the lens with fingertips on the lid, left hand flat on the counter, her face in the upper frame with lips together and a calm satisfied look, then her hand lifts away and the frame holds on the bowl and box.
+Cut 1 (0-0.7s) — MACRO STATIC: locked-off frame opens with her right thumb already mid-push under one cell of the clear tray held in her left hand, a single deep-green frozen portion popping up out of it, frost crystals flicking off, her voice already running from frame one; no face in frame. Hard cut to.
+Cut 2 (0.7-1.3s) — MEDIUM CLOSE-UP SELFIE: she holds the one green portion up between her right thumb and index finger beside her cheek, left hand off-frame with the camera, the tray resting flat on the counter; eyebrows lift, a small "oh" on her mouth, she turns the portion once in her fingers, eyes on it. Hard cut to.
+Cut 3 (1.3-2s) — WIDER STATIC: locked-off frame of her upper body at the counter, she drops the single portion from her right hand into the white bowl of pale smoothie base, left hand steadying the rim, a soft plop, her gaze following it down, lips mid-word; the one open carton stands beside the bowl. Hard cut to.
+Cut 4 (2-2.6s) — MACRO STATIC: locked-off, inside the bowl the portion sinks and a deep-green streak spreads through the pale base as her right hand pulls the spoon through it once, left hand gripping the rim, window light raking across the surface, no face in frame. Hard cut to.
+Cut 5 (2.6-3.2s) — TIGHT CLOSE-UP SELFIE: her face only, lips pressed together in a closed-mouth grin with no voice for this beat, eyes cast down toward the counter then lifting to the lens, chin tucked, a small nod; left hand off-frame with the camera, right hand parked flat on the counter out of frame; no product in this frame. Hard cut to.
+Cut 6 (3.2-3.8s) — MEDIUM CLOSE-UP STATIC: locked-off, both her hands set the finished deep-green dish down on the counter, left hand cupping the bowl, right hand laying the spoon beside it, the single carton standing to the right with its front label toward camera, her face at the top edge looking down, a satisfied exhale. Hard cut to.
+Cut 7 (3.8-4.4s) — MEDIUM CLOSE-UP SELFIE: she raises the finished green bowl in her right hand toward the lens at chest height, left hand off-frame with the camera, a wide easy grin, head tilting, hair swinging, the carton visible behind her on the counter at real size. Hard cut to.
+Cut 8 (4.4-5s) — MEDIUM STATIC: locked-off loop-ready closing frame, the green bowl and the single carton side by side on the counter, front label toward camera; her right hand slides the carton a few centimeters toward the lens with fingertips on the lid, left hand flat on the counter, her face in the upper frame with lips together and a calm satisfied look, then her hand lifts away and the frame holds on the bowl and box.
 
 Static Description: The same home kitchen — light wood counter, white tile backsplash, window to camera-left with even neutral daylight, the paper bag pushed to the back of the counter, one plain white ceramic bowl and one plain metal spoon. Exactly one spirulina carton, one tray, and at most one loose portion exist in the scene; the only box-shaped object in frame is the product.
 
-Audio: She speaks to camera with a clear, bright, articulate American voice, iPhone microphone audio with natural room tone: "—and inside it's a tray, little frozen portions. One pops right out, straight into the bowl, and it goes this deep GREEN. That's it. Freezer aisle, Wegmans. Go look."
+Audio: She speaks to camera with a clear, bright, articulate American voice, iPhone microphone audio with natural room tone: "—one pops right out, into the bowl, deep GREEN. Freezer aisle, Wegmans."
 
 Facial features clear and undistorted, consistent clothing throughout. Shot on iPhone, natural lighting, social media aesthetic, handheld micro-shake during selfie cuts, locked-off frozen frame during static-camera cuts. No on-screen text, no subtitles, no captions, no watermarks, no legible text on any object except the product's own label, no store logo, no real brand logos anywhere, no phone visible in any frame, no cinematic grade, no film grain, no bokeh, no lens flare, no fisheye lens, no ultra-wide distortion, no slow motion, no beauty filter, no third arm, no extra hands, no duplicated limbs, no deformed hands, exactly one product in every frame.
 ```
 
 ### 3.6 חיבור וייצוא
 
-שני הקליפים מתחברים ב-hard cut (ffmpeg concat, stream copy) ל-`final.mp4` של 30 שניות.
+שני הקליפים (15s + 5s) מתחברים ב-hard cut (ffmpeg concat, stream copy) ל-`final.mp4` של 20 שניות.
 בדיקת QA לפני החיבור: קופסה אחת בלבד בכל פריים, שתי ידיים לכל היותר, המכסה במצב אחד לכל פריים, התווית לא ג'יבריש ולא מותג אחר, אין טקסט צרוב.
 
 ---
@@ -236,5 +236,5 @@ Facial features clear and undistorted, consistent clothing throughout. Shot on i
 
 ## 5. וריאציות מהירות לבדיקת A/B (אותם לוחות, רק שורת ה-Audio משתנה)
 
-- **Hook B (Mid-Sentence Confession):** "—the frozen aisle at Wegmans, bottom shelf, I almost walked past it. Fresh spirulina. Frozen, not powder. Look how small this box is."
-- **Hook C (Freeze-Reaction, H4):** קאט 1 נפתח על הפנים שלה כבר בתגובה, מבט נעול על הקופסה, 0.6 שניות שקט, ואז: "Fresh spirulina. In the freezer. At Wegmans. Look how small this box is."
+- **Hook B (Mid-Sentence Confession):** "—the frozen aisle at Wegmans, bottom shelf, I almost walked past it. Fresh spirulina. Frozen, not powder. And inside, a tray of little frozen portions."
+- **Hook C (Freeze-Reaction, H4):** קאט 1 נפתח על הפנים שלה כבר בתגובה, מבט נעול על הקופסה, 0.6 שניות שקט, ואז: "Fresh spirulina. In the freezer. At Wegmans. And inside, a tray of little frozen portions."
